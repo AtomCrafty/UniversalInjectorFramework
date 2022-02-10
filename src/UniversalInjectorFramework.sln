@@ -1,0 +1,101 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31912.275
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UniversalInjectorFramework", "UniversalInjectorFramework\UniversalInjectorFramework.vcxproj", "{CBBF2C50-0662-4442-AD10-881D8E95DDA3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Detours", "Detours\Detours.vcxproj", "{962A7719-2381-40D0-8214-377689F9429A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		d3d11|x64 = d3d11|x64
+		d3d11|x86 = d3d11|x86
+		d3d8|x64 = d3d8|x64
+		d3d8|x86 = d3d8|x86
+		d3d9|x64 = d3d9|x64
+		d3d9|x86 = d3d9|x86
+		d3dcompiler_47|x64 = d3dcompiler_47|x64
+		d3dcompiler_47|x86 = d3dcompiler_47|x86
+		dxgi|x64 = dxgi|x64
+		dxgi|x86 = dxgi|x86
+		gdi32|x64 = gdi32|x64
+		gdi32|x86 = gdi32|x86
+		ole32|x64 = ole32|x64
+		ole32|x86 = ole32|x86
+		opengl32|x64 = opengl32|x64
+		opengl32|x86 = opengl32|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d11|x64.ActiveCfg = d3d11|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d11|x64.Build.0 = d3d11|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d11|x86.ActiveCfg = d3d11|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d11|x86.Build.0 = d3d11|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d8|x64.ActiveCfg = d3d8|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d8|x64.Build.0 = d3d8|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d8|x86.ActiveCfg = d3d8|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d8|x86.Build.0 = d3d8|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x64.ActiveCfg = d3d9|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x64.Build.0 = d3d9|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x86.ActiveCfg = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x86.Build.0 = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x64.ActiveCfg = d3dcompiler_47|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x64.Build.0 = d3dcompiler_47|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x86.ActiveCfg = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x86.Build.0 = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.dxgi|x64.ActiveCfg = dxgi|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.dxgi|x64.Build.0 = dxgi|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.dxgi|x86.ActiveCfg = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.dxgi|x86.Build.0 = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.gdi32|x64.ActiveCfg = gdi32|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.gdi32|x64.Build.0 = gdi32|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.gdi32|x86.ActiveCfg = gdi32|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.gdi32|x86.Build.0 = gdi32|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.ole32|x64.ActiveCfg = ole32|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.ole32|x64.Build.0 = ole32|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.ole32|x86.ActiveCfg = ole32|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.ole32|x86.Build.0 = ole32|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x64.ActiveCfg = opengl32|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x64.Build.0 = opengl32|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x86.ActiveCfg = opengl32|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x86.Build.0 = opengl32|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d8|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d8|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d8|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d8|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.dxgi|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.dxgi|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.dxgi|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.dxgi|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.gdi32|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.gdi32|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.gdi32|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.gdi32|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.ole32|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.ole32|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.ole32|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.ole32|x86.Build.0 = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x64.ActiveCfg = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x64.Build.0 = Release|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x86.ActiveCfg = Release|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9F840163-4FF0-4E8A-A78C-CA364B626FDB}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,202 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files\features">
+      <UniqueIdentifier>{a13f8962-c15c-4ad1-b8db-502d6776ef64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\proxies">
+      <UniqueIdentifier>{b60d6976-4731-446c-bb27-26d4609a4f7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\features">
+      <UniqueIdentifier>{5cd8fe93-e08e-4fb4-94b3-46626e5d447b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\proxies">
+      <UniqueIdentifier>{40b37917-c6a3-4c82-89b8-ffe84113fae2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hooks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="injector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="encoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="features\play_timer.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\_feature_base.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\allocate_console.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\character_substitution.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\d3d9.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\dxgi.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="features\start_suspended.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\gdi32.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\d3dcompiler_47.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="libraries.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\d3d11.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\opengl32.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\d3d8.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\ole32.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
+    <ClInclude Include="features\yuka_engine_fixes.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\tunnel_decoder.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="features\font_manager.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="ansi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="injector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="encoding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="features\play_timer.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\_feature_base.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\allocate_console.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\character_substitution.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\d3d9.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\dxgi.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="features\start_suspended.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\gdi32.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\d3dcompiler_47.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="libraries.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\d3d11.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\opengl32.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\d3d8.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\ole32.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="features\yuka_engine_fixes.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\tunnel_decoder.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\font_manager.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="proxies\d3dcompiler_47.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\dxgi.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\gdi32.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\d3d9.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\d3d11.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\opengl32.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\d3d8.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\ole32.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+  </ItemGroup>
+</Project>

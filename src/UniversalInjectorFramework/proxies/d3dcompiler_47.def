@@ -1,0 +1,31 @@
+LIBRARY d3dcompiler_47
+EXPORTS
+	D3DAssemble=lib_d3dcompiler_47_D3DAssemble @1
+	D3DCompile=lib_d3dcompiler_47_D3DCompile @2
+	D3DCompile2=lib_d3dcompiler_47_D3DCompile2 @3
+	D3DCompileFromFile=lib_d3dcompiler_47_D3DCompileFromFile @4
+	D3DCompressShaders=lib_d3dcompiler_47_D3DCompressShaders @5
+	D3DCreateBlob=lib_d3dcompiler_47_D3DCreateBlob @6
+	D3DCreateFunctionLinkingGraph=lib_d3dcompiler_47_D3DCreateFunctionLinkingGraph @7
+	D3DCreateLinker=lib_d3dcompiler_47_D3DCreateLinker @8
+	D3DDecompressShaders=lib_d3dcompiler_47_D3DDecompressShaders @9
+	D3DDisassemble=lib_d3dcompiler_47_D3DDisassemble @10
+	D3DDisassemble10Effect=lib_d3dcompiler_47_D3DDisassemble10Effect @11
+	D3DDisassemble11Trace=lib_d3dcompiler_47_D3DDisassemble11Trace @12
+	D3DDisassembleRegion=lib_d3dcompiler_47_D3DDisassembleRegion @13
+	D3DGetBlobPart=lib_d3dcompiler_47_D3DGetBlobPart @14
+	D3DGetDebugInfo=lib_d3dcompiler_47_D3DGetDebugInfo @15
+	D3DGetInputAndOutputSignatureBlob=lib_d3dcompiler_47_D3DGetInputAndOutputSignatureBlob @16
+	D3DGetInputSignatureBlob=lib_d3dcompiler_47_D3DGetInputSignatureBlob @17
+	D3DGetOutputSignatureBlob=lib_d3dcompiler_47_D3DGetOutputSignatureBlob @18
+	D3DGetTraceInstructionOffsets=lib_d3dcompiler_47_D3DGetTraceInstructionOffsets @19
+	D3DLoadModule=lib_d3dcompiler_47_D3DLoadModule @20
+	D3DPreprocess=lib_d3dcompiler_47_D3DPreprocess @21
+	D3DReadFileToBlob=lib_d3dcompiler_47_D3DReadFileToBlob @22
+	D3DReflect=lib_d3dcompiler_47_D3DReflect @23
+	D3DReflectLibrary=lib_d3dcompiler_47_D3DReflectLibrary @24
+	D3DReturnFailure1=lib_d3dcompiler_47_D3DReturnFailure1 @25
+	D3DSetBlobPart=lib_d3dcompiler_47_D3DSetBlobPart @26
+	D3DStripShader=lib_d3dcompiler_47_D3DStripShader @27
+	D3DWriteBlobToFile=lib_d3dcompiler_47_D3DWriteBlobToFile @28
+	DebugSetMute=lib_d3dcompiler_47_DebugSetMute @29

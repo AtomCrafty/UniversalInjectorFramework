@@ -215,8 +215,8 @@ void uif::features::yuka_engine_fixes::finalize()
 }
 
 template <typename T>
-void uif::features::yuka_engine_fixes::get_address(long fallback, T& target, const std::string& name)
+void uif::features::yuka_engine_fixes::get_address(intptr_t fallback, T& target, const std::string& name)
 {
-	long offset = config().value("/yuka_process_text_hook/addresses/"_json_pointer / name, fallback);
+	intptr_t offset = config().value("/yuka_process_text_hook/addresses/"_json_pointer / name, fallback);
 	target = reinterpret_cast<T>(offset);
 }

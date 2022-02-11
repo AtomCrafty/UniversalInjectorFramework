@@ -29,7 +29,7 @@ namespace uif::features
 		bool enabled = false;
 
 	private:
-		template<typename T> void get_address(long fallback, T& target, const std::string& name);
+		template<typename T> void get_address(intptr_t fallback, T& target, const std::string& name);
 	};
 }
 

@@ -41,22 +41,6 @@
       <Configuration>d3dcompiler_47</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="gdi32|Win32">
-      <Configuration>gdi32</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="gdi32|x64">
-      <Configuration>gdi32</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ole32|Win32">
-      <Configuration>ole32</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ole32|x64">
-      <Configuration>ole32</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="opengl32|Win32">
       <Configuration>opengl32</Configuration>
       <Platform>Win32</Platform>
@@ -165,22 +149,6 @@
       <ModuleDefinitionFile>proxies\d3dcompiler_47.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='gdi32'">
-    <ClCompile>
-      <PreprocessorDefinitions>UIF_LIB_GDI32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <Link>
-      <ModuleDefinitionFile>proxies\gdi32.def</ModuleDefinitionFile>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)'=='ole32'">
-    <ClCompile>
-      <PreprocessorDefinitions>UIF_LIB_OLE32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-    <Link>
-      <ModuleDefinitionFile>proxies\ole32.def</ModuleDefinitionFile>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='opengl32'">
     <ClCompile>
       <PreprocessorDefinitions>UIF_LIB_OPENGL32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -202,11 +170,9 @@
     <ClInclude Include="proxies\dxgi.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="features\font_manager.h" />
-    <ClInclude Include="proxies\gdi32.h" />
     <ClInclude Include="injector.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="libraries.h" />
-    <ClInclude Include="proxies\ole32.h" />
     <ClInclude Include="proxies\opengl32.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="hooks.h" />
@@ -229,10 +195,8 @@
     <ClCompile Include="proxies\dxgi.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="features\font_manager.cpp" />
-    <ClCompile Include="proxies\gdi32.cpp" />
     <ClCompile Include="injector.cpp" />
     <ClCompile Include="libraries.cpp" />
-    <ClCompile Include="proxies\ole32.cpp" />
     <ClCompile Include="proxies\opengl32.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -256,8 +220,6 @@
     <None Include="proxies\d3d9.def" />
     <None Include="proxies\d3dcompiler_47.def" />
     <None Include="proxies\dxgi.def" />
-    <None Include="proxies\gdi32.def" />
-    <None Include="proxies\ole32.def" />
     <None Include="proxies\opengl32.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

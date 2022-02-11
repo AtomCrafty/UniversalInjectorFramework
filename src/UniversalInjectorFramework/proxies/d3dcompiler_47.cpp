@@ -2,20 +2,23 @@
 
 #ifdef UIF_LIB_D3DCOMPILER_47
 
-struct dxgi_dll {
+#include "injector.h"
+
+struct {
 	HMODULE dll;
 	FARPROC D3DAssemble;
-	FARPROC D3DCompile;
+	FARPROC DebugSetMute;
 	FARPROC D3DCompile2;
+	FARPROC D3DCompile;
 	FARPROC D3DCompileFromFile;
 	FARPROC D3DCompressShaders;
 	FARPROC D3DCreateBlob;
 	FARPROC D3DCreateFunctionLinkingGraph;
 	FARPROC D3DCreateLinker;
 	FARPROC D3DDecompressShaders;
-	FARPROC D3DDisassemble;
 	FARPROC D3DDisassemble10Effect;
 	FARPROC D3DDisassemble11Trace;
+	FARPROC D3DDisassemble;
 	FARPROC D3DDisassembleRegion;
 	FARPROC D3DGetBlobPart;
 	FARPROC D3DGetDebugInfo;
@@ -32,21 +35,21 @@ struct dxgi_dll {
 	FARPROC D3DSetBlobPart;
 	FARPROC D3DStripShader;
 	FARPROC D3DWriteBlobToFile;
-	FARPROC DebugSetMute;
 } d3dcompiler_47;
 
 void lib_d3dcompiler_47_D3DAssemble() { d3dcompiler_47.D3DAssemble(); }
-void lib_d3dcompiler_47_D3DCompile() { d3dcompiler_47.D3DCompile(); }
+void lib_d3dcompiler_47_DebugSetMute() { d3dcompiler_47.DebugSetMute(); }
 void lib_d3dcompiler_47_D3DCompile2() { d3dcompiler_47.D3DCompile2(); }
+void lib_d3dcompiler_47_D3DCompile() { d3dcompiler_47.D3DCompile(); }
 void lib_d3dcompiler_47_D3DCompileFromFile() { d3dcompiler_47.D3DCompileFromFile(); }
 void lib_d3dcompiler_47_D3DCompressShaders() { d3dcompiler_47.D3DCompressShaders(); }
 void lib_d3dcompiler_47_D3DCreateBlob() { d3dcompiler_47.D3DCreateBlob(); }
 void lib_d3dcompiler_47_D3DCreateFunctionLinkingGraph() { d3dcompiler_47.D3DCreateFunctionLinkingGraph(); }
 void lib_d3dcompiler_47_D3DCreateLinker() { d3dcompiler_47.D3DCreateLinker(); }
 void lib_d3dcompiler_47_D3DDecompressShaders() { d3dcompiler_47.D3DDecompressShaders(); }
-void lib_d3dcompiler_47_D3DDisassemble() { d3dcompiler_47.D3DDisassemble(); }
 void lib_d3dcompiler_47_D3DDisassemble10Effect() { d3dcompiler_47.D3DDisassemble10Effect(); }
 void lib_d3dcompiler_47_D3DDisassemble11Trace() { d3dcompiler_47.D3DDisassemble11Trace(); }
+void lib_d3dcompiler_47_D3DDisassemble() { d3dcompiler_47.D3DDisassemble(); }
 void lib_d3dcompiler_47_D3DDisassembleRegion() { d3dcompiler_47.D3DDisassembleRegion(); }
 void lib_d3dcompiler_47_D3DGetBlobPart() { d3dcompiler_47.D3DGetBlobPart(); }
 void lib_d3dcompiler_47_D3DGetDebugInfo() { d3dcompiler_47.D3DGetDebugInfo(); }
@@ -63,30 +66,22 @@ void lib_d3dcompiler_47_D3DReturnFailure1() { d3dcompiler_47.D3DReturnFailure1()
 void lib_d3dcompiler_47_D3DSetBlobPart() { d3dcompiler_47.D3DSetBlobPart(); }
 void lib_d3dcompiler_47_D3DStripShader() { d3dcompiler_47.D3DStripShader(); }
 void lib_d3dcompiler_47_D3DWriteBlobToFile() { d3dcompiler_47.D3DWriteBlobToFile(); }
-void lib_d3dcompiler_47_DebugSetMute() { d3dcompiler_47.DebugSetMute(); }
 
 bool load_library_d3dcompiler_47() {
-	wchar_t path[MAX_PATH];
-	GetSystemDirectory(path, MAX_PATH);
-	lstrcat(path, L"\\d3dcompiler_47.dll");
-	d3dcompiler_47.dll = LoadLibrary(path);
-	if (reinterpret_cast<size_t>(d3dcompiler_47.dll) == false)
-	{
-		MessageBox(0, L"Cannot load original d3dcompiler_47.dll library", L"Universal Injector", MB_ICONERROR);
-		ExitProcess(0);
-	}
+	d3dcompiler_47.dll = uif::injector::instance().load_real_library("d3dcompiler_47.dll");
 	d3dcompiler_47.D3DAssemble = GetProcAddress(d3dcompiler_47.dll, "D3DAssemble");
-	d3dcompiler_47.D3DCompile = GetProcAddress(d3dcompiler_47.dll, "D3DCompile");
+	d3dcompiler_47.DebugSetMute = GetProcAddress(d3dcompiler_47.dll, "DebugSetMute");
 	d3dcompiler_47.D3DCompile2 = GetProcAddress(d3dcompiler_47.dll, "D3DCompile2");
+	d3dcompiler_47.D3DCompile = GetProcAddress(d3dcompiler_47.dll, "D3DCompile");
 	d3dcompiler_47.D3DCompileFromFile = GetProcAddress(d3dcompiler_47.dll, "D3DCompileFromFile");
 	d3dcompiler_47.D3DCompressShaders = GetProcAddress(d3dcompiler_47.dll, "D3DCompressShaders");
 	d3dcompiler_47.D3DCreateBlob = GetProcAddress(d3dcompiler_47.dll, "D3DCreateBlob");
 	d3dcompiler_47.D3DCreateFunctionLinkingGraph = GetProcAddress(d3dcompiler_47.dll, "D3DCreateFunctionLinkingGraph");
 	d3dcompiler_47.D3DCreateLinker = GetProcAddress(d3dcompiler_47.dll, "D3DCreateLinker");
 	d3dcompiler_47.D3DDecompressShaders = GetProcAddress(d3dcompiler_47.dll, "D3DDecompressShaders");
-	d3dcompiler_47.D3DDisassemble = GetProcAddress(d3dcompiler_47.dll, "D3DDisassemble");
 	d3dcompiler_47.D3DDisassemble10Effect = GetProcAddress(d3dcompiler_47.dll, "D3DDisassemble10Effect");
 	d3dcompiler_47.D3DDisassemble11Trace = GetProcAddress(d3dcompiler_47.dll, "D3DDisassemble11Trace");
+	d3dcompiler_47.D3DDisassemble = GetProcAddress(d3dcompiler_47.dll, "D3DDisassemble");
 	d3dcompiler_47.D3DDisassembleRegion = GetProcAddress(d3dcompiler_47.dll, "D3DDisassembleRegion");
 	d3dcompiler_47.D3DGetBlobPart = GetProcAddress(d3dcompiler_47.dll, "D3DGetBlobPart");
 	d3dcompiler_47.D3DGetDebugInfo = GetProcAddress(d3dcompiler_47.dll, "D3DGetDebugInfo");
@@ -103,7 +98,6 @@ bool load_library_d3dcompiler_47() {
 	d3dcompiler_47.D3DSetBlobPart = GetProcAddress(d3dcompiler_47.dll, "D3DSetBlobPart");
 	d3dcompiler_47.D3DStripShader = GetProcAddress(d3dcompiler_47.dll, "D3DStripShader");
 	d3dcompiler_47.D3DWriteBlobToFile = GetProcAddress(d3dcompiler_47.dll, "D3DWriteBlobToFile");
-	d3dcompiler_47.DebugSetMute = GetProcAddress(d3dcompiler_47.dll, "DebugSetMute");
 	return true;
 }
 

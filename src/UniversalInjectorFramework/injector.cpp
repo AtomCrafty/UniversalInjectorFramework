@@ -77,4 +77,39 @@ namespace uif
 		std::cout << white("[injector]") << cyan(" Shutting down. Goodbye :)\n");
 		std::cout << white("[injector] ======================================================\n");
 	}
+
+	HMODULE injector::load_real_library(const std::string& dllName)
+	{
+		std::string dllPath;
+
+		if(config().contains("/real_library_location"_json_pointer))
+		{
+			const auto& value = config()["/real_library_location"_json_pointer];
+			if(value.is_string())
+			{
+				value.get_to(dllPath);
+			}
+		}
+
+		if(dllPath.empty())
+		{
+			char sysDir[MAX_PATH];
+			GetSystemDirectoryA(sysDir, MAX_PATH);
+			dllPath = std::string(sysDir) + '\\' + dllName;
+		}
+
+		std::cout << white("[injector]") << " Loading original library from " << dllPath << "\n";
+
+		const auto result = LoadLibraryA(dllPath.c_str());
+
+		if(result == nullptr)
+		{
+			std::cout << white("[injector]") << red(" Error:") << " Failed to load original library\n";
+			const std::string error = "Unable to locate original library.\nPlease check the configuration file.\n\nPath: " + dllPath;
+			MessageBoxA(nullptr, error.c_str(), "Universal Injector", MB_ICONERROR);
+			ExitProcess(1);
+		}
+
+		return result;
+	}
 }

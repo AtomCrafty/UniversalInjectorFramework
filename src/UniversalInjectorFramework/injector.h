@@ -16,7 +16,9 @@ namespace uif
 		void attach();
 		void detach();
 		template<typename T> T& feature() const;
-		
+
+		HMODULE load_real_library(const std::string& dllName);
+
 		HMODULE game_module;
 	private:
 		static injector* _instance;

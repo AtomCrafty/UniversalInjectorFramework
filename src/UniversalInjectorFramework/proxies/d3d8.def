@@ -1,7 +1,7 @@
 LIBRARY d3d8
 EXPORTS
-	DebugSetMute=lib_d3d8_DebugSetMute @1
-	Direct3D8EnableMaximizedWindowedModeShim=lib_d3d8_Direct3D8EnableMaximizedWindowedModeShim @2
-	Direct3DCreate8=lib_d3d8_Direct3DCreate8 @3
-	ValidatePixelShader=lib_d3d8_ValidatePixelShader @4
-	ValidateVertexShader=lib_d3d8_ValidateVertexShader @5
+	Direct3D8EnableMaximizedWindowedModeShim=lib_d3d8_Direct3D8EnableMaximizedWindowedModeShim @1
+	ValidatePixelShader=lib_d3d8_ValidatePixelShader @2
+	ValidateVertexShader=lib_d3d8_ValidateVertexShader @3
+	DebugSetMute=lib_d3d8_DebugSetMute @4
+	Direct3DCreate8=lib_d3d8_Direct3DCreate8 @5

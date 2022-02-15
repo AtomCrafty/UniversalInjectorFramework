@@ -93,9 +93,14 @@ namespace uif::hooks
 
 	bool hook_import(const features::feature_base* feature, const char* importName, void* hookFunction)
 	{
-		hook_import_info info{ feature, importName, hookFunction, false };
-		auto* module = injector::instance().game_module;
-		DetourEnumerateImportsEx(module, &info, nullptr, hook_import_enum_proc);
+		hook_import_info info{ feature, importName, hookFunction, false, false };
+
+		DetourEnumerateImportsEx(injector::instance().game_module, &info, nullptr, hook_import_enum_proc);
+		for(const auto module : injector::instance().additional_modules)
+		{
+			DetourEnumerateImportsEx(module, &info, nullptr, hook_import_enum_proc);
+		}
+
 		if(!info.found)
 			std::cout << *feature << black(" Unable to hook import ") << black(importName) << black(" because it does not exist\n");
 		return info.success;
@@ -103,9 +108,14 @@ namespace uif::hooks
 
 	bool unhook_import(const features::feature_base* feature, const char* importName, void* hookFunction)
 	{
-		hook_import_info info{ feature, importName, hookFunction, false };
-		auto* module = injector::instance().game_module;
-		DetourEnumerateImportsEx(module, &info, nullptr, unhook_import_enum_proc);
+		hook_import_info info{ feature, importName, hookFunction, false, false };
+
+		DetourEnumerateImportsEx(injector::instance().game_module, &info, nullptr, unhook_import_enum_proc);
+		for(const auto module : injector::instance().additional_modules)
+		{
+			DetourEnumerateImportsEx(module, &info, nullptr, unhook_import_enum_proc);
+		}
+
 		if(!info.found)
 			std::cout << *feature << black(" Unable to unhook import ") << black(importName) << black(" because it does not exist\n");
 		return info.success;

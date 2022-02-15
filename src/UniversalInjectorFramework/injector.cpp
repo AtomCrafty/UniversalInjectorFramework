@@ -43,10 +43,35 @@ namespace uif
 	{
 		initialize_feature<features::allocate_console>();
 
-		char name[MAX_PATH];
-		GetModuleFileNameA(game_module, name, MAX_PATH);
+		char exePath[MAX_PATH];
+		GetModuleFileNameA(game_module, exePath, MAX_PATH);
 		std::cout << white("[injector] ======================================================\n");
-		std::cout << white("[injector]") << " Injecting into module " << yellow(name) << " at address " << blue(game_module) << '\n';
+		std::cout << white("[injector]") << " Injecting into module " << yellow(exePath) << " at address " << blue(game_module) << '\n';
+
+		if(config().contains("/injector/additional_modules"_json_pointer))
+		{
+			auto& additionalModules = config()["/injector/additional_modules"_json_pointer];
+
+			if(additionalModules.is_array()) {
+
+				for(const auto& moduleNameValue : additionalModules)
+				{
+					if(!moduleNameValue.is_string()) continue;
+
+					std::string moduleName;
+					moduleNameValue.get_to(moduleName);
+
+					auto handle = GetModuleHandleA(moduleName.c_str());
+
+					if(!handle) {
+						std::cout << white("[injector]") << " Unable to locate additional module " << yellow(moduleName) << '\n';
+						continue;
+					}
+
+					additional_modules.push_back(handle);
+				}
+			}
+		}
 
 		libraries::load();
 

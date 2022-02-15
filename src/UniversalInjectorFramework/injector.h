@@ -20,6 +20,7 @@ namespace uif
 		HMODULE load_real_library(const std::string& dllName);
 
 		HMODULE game_module;
+		std::vector<HMODULE> additional_modules{};
 	private:
 		static injector* _instance;
 		uif::config _config;

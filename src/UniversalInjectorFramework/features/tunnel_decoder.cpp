@@ -16,6 +16,19 @@ BOOL __stdcall TextOutAHook(HDC hdc, int x, int y, LPCSTR lpString, int c)
 	return TextOutW(hdc, x, y, decoded.c_str(), static_cast<int>(decoded.length()));
 }
 
+int __stdcall MultiByteToWideCharHook(UINT CodePage, DWORD dwFlags, LPCCH lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar)
+{
+	const auto& decoder = uif::injector::instance().feature<uif::features::tunnel_decoder>();
+	const auto& decoded = decoder.decode(lpMultiByteStr, cbMultiByte);
+
+	const int decodedCount = static_cast<int>(cbMultiByte < 0 ? decoded.length() + 1 : decoded.length());
+	if(decodedCount > cchWideChar)
+		return 0;
+
+	wcscpy_s(lpWideCharStr, cchWideChar, decoded.c_str());
+	return decodedCount;
+}
+
 void uif::features::tunnel_decoder::initialize()
 {
 	if(config().value("/tunnel_decoder/enable"_json_pointer, false))
@@ -45,6 +58,7 @@ void uif::features::tunnel_decoder::initialize()
 		}
 
 		hooks::hook_import(this, "TextOutA", TextOutAHook);
+		hooks::hook_import(this, "MultiByteToWideChar", MultiByteToWideCharHook);
 	}
 }
 
@@ -53,6 +67,7 @@ void uif::features::tunnel_decoder::finalize()
 	if(enabled)
 	{
 		hooks::unhook_import(this, "TextOutA", TextOutAHook);
+		hooks::unhook_import(this, "MultiByteToWideChar", MultiByteToWideCharHook);
 	}
 }
 

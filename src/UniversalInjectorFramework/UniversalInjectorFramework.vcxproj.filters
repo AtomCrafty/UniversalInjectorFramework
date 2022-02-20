@@ -65,9 +65,6 @@
     <ClInclude Include="features\start_suspended.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
-    <ClInclude Include="proxies\gdi32.h">
-      <Filter>Header Files\proxies</Filter>
-    </ClInclude>
     <ClInclude Include="proxies\d3dcompiler_47.h">
       <Filter>Header Files\proxies</Filter>
     </ClInclude>
@@ -83,9 +80,6 @@
     <ClInclude Include="proxies\d3d8.h">
       <Filter>Header Files\proxies</Filter>
     </ClInclude>
-    <ClInclude Include="proxies\ole32.h">
-      <Filter>Header Files\proxies</Filter>
-    </ClInclude>
     <ClInclude Include="features\yuka_engine_fixes.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
@@ -97,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="ansi.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="features\file_monitor.h">
+      <Filter>Header Files\features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -142,9 +139,6 @@
     <ClCompile Include="features\start_suspended.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
-    <ClCompile Include="proxies\gdi32.cpp">
-      <Filter>Source Files\proxies</Filter>
-    </ClCompile>
     <ClCompile Include="proxies\d3dcompiler_47.cpp">
       <Filter>Source Files\proxies</Filter>
     </ClCompile>
@@ -160,9 +154,6 @@
     <ClCompile Include="proxies\d3d8.cpp">
       <Filter>Source Files\proxies</Filter>
     </ClCompile>
-    <ClCompile Include="proxies\ole32.cpp">
-      <Filter>Source Files\proxies</Filter>
-    </ClCompile>
     <ClCompile Include="features\yuka_engine_fixes.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
@@ -172,15 +163,15 @@
     <ClCompile Include="features\font_manager.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
+    <ClCompile Include="features\file_monitor.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="proxies\d3dcompiler_47.def">
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\dxgi.def">
-      <Filter>Source Files\proxies</Filter>
-    </None>
-    <None Include="proxies\gdi32.def">
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\d3d9.def">
@@ -193,9 +184,6 @@
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\d3d8.def">
-      <Filter>Source Files\proxies</Filter>
-    </None>
-    <None Include="proxies\ole32.def">
       <Filter>Source Files\proxies</Filter>
     </None>
   </ItemGroup>

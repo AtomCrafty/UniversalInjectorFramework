@@ -163,6 +163,7 @@
     <ClInclude Include="features\allocate_console.h" />
     <ClInclude Include="features\character_substitution.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="features\file_monitor.h" />
     <ClInclude Include="proxies\d3d11.h" />
     <ClInclude Include="proxies\d3d8.h" />
     <ClInclude Include="proxies\d3d9.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="features\allocate_console.cpp" />
     <ClCompile Include="features\character_substitution.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="features\file_monitor.cpp" />
     <ClCompile Include="proxies\d3d11.cpp" />
     <ClCompile Include="proxies\d3d8.cpp" />
     <ClCompile Include="proxies\d3dcompiler_47.cpp" />

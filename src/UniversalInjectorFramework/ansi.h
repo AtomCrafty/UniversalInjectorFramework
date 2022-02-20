@@ -90,4 +90,21 @@ namespace uif::ansi
 
 		return os;
 	}
+
+	template<typename T, color fg, color bg>
+	std::wostream& operator<<(std::wostream& os, const colored_thing<T, fg, bg> colored)
+	{
+		if(fg != color::none)
+			os << fg_ansi_codes[static_cast<int>(fg)];
+
+		if(bg != color::none)
+			os << bg_ansi_codes[static_cast<int>(bg)];
+
+		os << colored.thing;
+
+		if(fg != color::none || bg != color::none)
+			os << "\033[0m";
+
+		return os;
+	}
 }

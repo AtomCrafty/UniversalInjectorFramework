@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "file_monitor.h"
 
-#include <intrin.h>
-
 #include "ansi.h"
 #include "encoding.h"
 #include "hooks.h"
@@ -43,14 +41,22 @@ HANDLE __stdcall CreateFileWHook(
 	HANDLE hTemplateFile)
 {
 	auto& monitor = uif::injector::instance().feature<uif::features::file_monitor>();
+	std::wstring redirected;
 
-	if(monitor.log_all)
+	const auto* action = monitor.get_action(lpFileName, dwDesiredAccess);
+
+	if(monitor.log_all || action && action->log)
 	{
-		std::cout << monitor;
-		std::wcout << L" Accessing " << yellow(tryGetRelativePath(lpFileName)) << L" at " << blue(_ReturnAddress()) << L'\n';
+		std::cout << monitor << " Accessing ";
+		std::wcout << yellow(tryGetRelativePath(lpFileName));
+		std::cout << " [";
+		if(dwDesiredAccess & GENERIC_READ) std::cout << 'R';
+		if(dwDesiredAccess & GENERIC_WRITE) std::cout << 'W';
+		if(dwDesiredAccess & GENERIC_EXECUTE) std::cout << 'X';
+		std::cout << "]\n";
 	}
 
-	if(const auto* action = monitor.get_action(lpFileName)) {
+	if(action) {
 		if(action->breakpoint)
 		{
 			__debugbreak();
@@ -59,7 +65,7 @@ HANDLE __stdcall CreateFileWHook(
 		if(!action->redirect_path.empty())
 		{
 			std::cout << monitor;
-			const std::wstring redirected = std::regex_replace(lpFileName, action->path_pattern, action->redirect_path);
+			redirected = std::regex_replace(lpFileName, action->path_pattern, action->redirect_path);
 			std::wcout << L" Redirecting " << yellow(tryGetRelativePath(lpFileName)) << L" to " << yellow(tryGetRelativePath(redirected.c_str())) << L'\n';
 			lpFileName = redirected.c_str();
 		}
@@ -118,9 +124,33 @@ void uif::features::file_monitor::initialize()
 
 					std::wregex regex = pattern.empty() ? build_path_pattern(path) : std::wregex(pattern);
 					const auto& redirectPath = encoding::utf8_to_utf16(actionObject.value("redirect", ""));
+					const auto& accessFilterString = actionObject.value("access", "");
 					const bool breakpoint = actionObject.value("breakpoint", false);
+					const bool log = actionObject.value("log", false);
 
-					actions.push_back({ std::move(regex), redirectPath, breakpoint });
+					DWORD accessFilter = 0;
+					for(const char ch : accessFilterString)
+					{
+						switch(ch)
+						{
+						case 'r':
+						case 'R':
+							accessFilter |= GENERIC_READ;
+							break;
+						case 'w':
+						case 'W':
+							accessFilter |= GENERIC_WRITE;
+							break;
+						case 'x':
+						case 'X':
+							accessFilter |= GENERIC_EXECUTE;
+							break;
+						default:
+							break;
+						}
+					}
+
+					actions.push_back({ std::move(regex), redirectPath, accessFilter, breakpoint, log });
 				}
 			}
 			else
@@ -197,13 +227,15 @@ std::wregex uif::features::file_monitor::build_path_pattern(const std::wstring& 
 	return std::wregex(pattern);
 }
 
-uif::features::file_monitor::file_action* uif::features::file_monitor::get_action(std::wstring path)
+uif::features::file_monitor::file_action* uif::features::file_monitor::get_action(std::wstring path, DWORD desiredAccess)
 {
 	std::replace(path.begin(), path.end(), L'\\', L'/');
 	for(auto& action : actions)
 	{
 		if(std::regex_match(path, action.path_pattern))
 		{
+			if(action.accessFilter && !(action.accessFilter & desiredAccess))
+				continue;
 			return &action;
 		}
 	}

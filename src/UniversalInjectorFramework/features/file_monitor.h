@@ -16,10 +16,12 @@ namespace uif::features {
 		{
 			std::wregex path_pattern;
 			std::wstring redirect_path;
+			DWORD accessFilter;
 			bool breakpoint;
+			bool log;
 		};
 
-		file_action* get_action(std::wstring path);
+		file_action* get_action(std::wstring path, DWORD desiredAccess);
 
 		bool enabled = false;
 		bool log_all = false;

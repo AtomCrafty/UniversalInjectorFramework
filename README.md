@@ -137,6 +137,44 @@ Finally there is the `override_face` option, which allows you to override which 
 }
 ```
 
+## File Monitor
+The file monitor feature hooks into the Windows CreateFile API and allows you to perform a number of actions when specific files are accessed. To enable the feature, set the option `/file_monitor/enable` to true.
+
+You can simply log all file accesses to the console by setting the `log_all` option to true, but the primary function is controlled by the `actions` option.
+It is an array of objects, where each object specifies a file name filter and an action to apply when a file matching the filter is accessed.
+
+### Filtering
+There are two ways of specifying the file name filter. The first option is to declare a `path` property, which contains a file path using Windows wildcard notation (`*` for any string, `?` for any character). Backslash characters are automatically normalized to forward slashes. The matcher will check if the wildcards can be expanded in such a way that the result is a suffix of the accessed file path. In case this is not flexible enough for your needs, the second way is to instead declare a `pattern` property containing a regular expression.
+
+Apart from the file path, you can also filter by the dwDesiredAccess flags by defining the `access` property. The string may contain the characters `r`, `w` and `x` (case insensitive), which match accesses using the `GENERIC_READ`, `GENERIC_WRITE` and `GENERIC_EXECUTE` flags respectively. Omitting the property will ignore the flags.
+
+### Actions
+First and foremost, you can log accesses matching the filters by setting the `log` property to true. You can also trigger a software breakpoint (`__debugbreak()`) by setting the `breakpoint` property to true.
+
+Finally, you can redirect the access to a different path by specifying the `redirect` property.
+It is used as the format parameter to `std::regex_replace` and can contain back-references (`$1`) to capture groups defined in the filter pattern. If the `path` property was used instead of `pattern`, capture group 1 refers to the wildcard-expanded path (excluding any prefix not part of the filter path).
+
+```json
+{
+  "file_monitor": {
+    "enable": true,
+    "log_all": false,
+    "actions": [
+      {
+        "path": "*.png",
+        "log": true,
+        "breakpoint": false
+      },
+      {
+        "pattern": "^.*config\\/(.*)$",
+        "access": "w",
+        "redirect": "config-sink/$1"
+      }
+    ]
+  }
+}
+```
+
 ## Play Timer
 The play timer allows you to track how long a particular application has been running.
 It creates a separate file containing a list of all sessions with their duration as well as start and end times, as well as a cumulative total.

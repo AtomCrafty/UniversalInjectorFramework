@@ -9,14 +9,35 @@ The behavior of all features can be enabled and controlled with a `config.json` 
 
 The configuration is a [JSON file](https://en.wikipedia.org/wiki/JSON), which is easily readable by both people and machines. All config options must be contained within a root object, denoted by a pair of curly braces.
 
-This section will explain all the default features and their configuration options.
+The following sections will explain all the default features and their configuration options.
 
+- [Injector](#injector)
 - [Allocate Console](#allocate-console)
 - [Start Suspended](#start-suspended)
 - [Character Substitution](#character-substitution)
 - [Tunnel Decoder](#tunnel-decoder)
 - [Font Manager](#font-manager)
 - [Play Timer](#play-timer)
+
+## Injector
+This isn't actually a feature, but rather the general configuration for the injector itself (the component that is responsible for managing the other features). The injector currently has two options: `hook_modules` and `load_modules`.
+
+`hook_modules` is an array of names referring to modules loaded by the target executable. When a feature attempts to hook an import, the imported function will be hooked in the main executable as well as in all modules listed here. Make sure this list does not contain the name of your proxy dll, as that would mess with the imports of the injector itself.
+
+`load_modules` is an array of strings, each of which contains the path to a dll file that should be loaded on startup. You might want to hook functions in a dependency of the target executable via `hook_modules`. This will fail if the feature initialization is run before said dependency is loaded, so add it to this list to force it to be loaded before initialization.
+
+```json
+{
+  "injector": {
+    "load_modules": [
+      "plugin/EngineHelpers.dll"
+    ],
+    "hook_modules": [
+      "EngineHelpers.dll"
+    ]
+  }
+}
+```
 
 ## Allocate Console
 

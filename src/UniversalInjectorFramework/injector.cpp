@@ -49,13 +49,40 @@ namespace uif
 		std::cout << white("[injector] ======================================================\n");
 		std::cout << white("[injector]") << " Injecting into module " << yellow(exePath) << " at address " << blue(game_module) << '\n';
 
-		if(config().contains("/injector/additional_modules"_json_pointer))
+		if(config().contains("/injector/load_modules"_json_pointer))
 		{
-			auto& additionalModules = config()["/injector/additional_modules"_json_pointer];
+			auto& loadModules = config()["/injector/load_modules"_json_pointer];
 
-			if(additionalModules.is_array()) {
+			if(loadModules.is_array()) {
 
-				for(const auto& moduleNameValue : additionalModules)
+				for(const auto& dllPathValue : loadModules)
+				{
+					if(!dllPathValue.is_string()) continue;
+
+					std::string dllPath;
+					dllPathValue.get_to(dllPath);
+
+					auto handle = LoadLibraryA(dllPath.c_str());
+
+					if(!handle) {
+						std::cout << white("[injector]") << dark_red(" Error:") << " Unable to locate dll " << yellow(dllPath) << '\n';
+						continue;
+					}
+
+					std::cout << white("[injector]") << " Loaded dll " << yellow(dllPath) << '\n';
+
+					additional_modules.push_back(handle);
+				}
+			}
+		}
+		
+		if(config().contains("/injector/hook_modules"_json_pointer))
+		{
+			auto& additionalHookModules = config()["/injector/hook_modules"_json_pointer];
+
+			if(additionalHookModules.is_array()) {
+
+				for(const auto& moduleNameValue : additionalHookModules)
 				{
 					if(!moduleNameValue.is_string()) continue;
 
@@ -65,7 +92,7 @@ namespace uif
 					auto handle = GetModuleHandleA(moduleName.c_str());
 
 					if(!handle) {
-						std::cout << white("[injector]") << " Unable to locate additional module " << yellow(moduleName) << '\n';
+						std::cout << white("[injector]") << dark_red(" Error:") << " Unable to locate additional module " << yellow(moduleName) << '\n';
 						continue;
 					}
 

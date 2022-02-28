@@ -7,42 +7,56 @@
 #include "encoding.h"
 #include "hooks.h"
 
-static BOOL __stdcall TextOutAHook(HDC hdc, int x, int y, LPCSTR lpString, int c) {
-	const auto& character_substitution = uif::injector::instance().feature<uif::features::character_substitution>();
-	if(character_substitution.enable)
+static BOOL __stdcall TextOutWHook(HDC hdc, int x, int y, LPCWSTR lpString, int c) {
+	const auto& subst = uif::injector::instance().feature<uif::features::character_substitution>();
+	const auto& map = subst.substitutions;
+
+	std::wstring s = lpString;
+
+	for(wchar_t& ch : s)
 	{
-		const auto input = encoding::shiftjis_to_utf16(lpString);
-		auto output = std::wstring(input.length() + 1, L'\0');
-
-		const auto& map = character_substitution.substitutions;
-
-		for(size_t i = 0; i < input.length(); ++i)
+		const auto it = map.find(ch);
+		if(it != map.end())
 		{
-			auto ch = input[i];
-			auto it = map.find(ch);
-			if(it != map.end())
-			{
-				output[i] = it->second;
-			}
-			else {
-				output[i] = ch;
-			}
+			ch = it->second;
 		}
-
-		return TextOutW(hdc, x, y, output.c_str(), c);
 	}
 
-	return TextOutA(hdc, x, y, lpString, c);
+	return TextOutW(hdc, x, y, s.c_str(), static_cast<int>(s.length()));
+}
+
+static BOOL __stdcall TextOutAHook(HDC hdc, int x, int y, LPCSTR lpString, int c) {
+	const auto s = encoding::shiftjis_to_utf16(lpString);
+	return TextOutWHook(hdc, x, y, s.c_str(), static_cast<int>(s.length()));
+}
+
+static DWORD  __stdcall GetGlyphOutlineWHook(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, MAT2* lpmat2)
+{
+	const auto& subst = uif::injector::instance().feature<uif::features::character_substitution>();
+	const auto& map = subst.substitutions;
+
+	const auto it = map.find(static_cast<wchar_t>(uChar));
+	if(it != map.end())
+	{
+		uChar = it->second;
+	}
+
+	return GetGlyphOutlineW(hdc, uChar, fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
+}
+
+static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, MAT2* lpmat2) {
+	const char a[3] = { static_cast<char>(uChar), static_cast<char>(uChar >> 8), 0 };
+	const auto s = encoding::shiftjis_to_utf16(a);
+	return GetGlyphOutlineWHook(hdc, s[0], fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
 }
 
 void uif::features::character_substitution::initialize()
 {
 
-	if (config().value("/character_substitution/enable"_json_pointer, false) == true)
+	if(config().value("/character_substitution/enable"_json_pointer, false) == true)
 	{
-		std::cout << "Enabling character substitution" << std::endl;
-		std::cout << "source: " << config().value("/character_substitution/source_characters"_json_pointer, "") << std::endl;
-		std::cout << "target: " << config().value("/character_substitution/target_characters"_json_pointer, "") << std::endl;
+		//std::cout << *this << " source: " << config().value("/character_substitution/source_characters"_json_pointer, "") << '\n';
+		//std::cout << *this << " target: " << config().value("/character_substitution/target_characters"_json_pointer, "") << '\n';
 
 		enable = true;
 		substitutions = std::map<wchar_t, wchar_t>();
@@ -53,41 +67,18 @@ void uif::features::character_substitution::initialize()
 		const std::wstring wsource = encoding::utf8_to_utf16(source);
 		const std::wstring wtarget = encoding::utf8_to_utf16(target);
 
-		const size_t subst_count = min(wsource.length(), wtarget.length());
-		for (size_t i = 0; i < subst_count; i++)
+		const size_t substCount = min(wsource.length(), wtarget.length());
+		for(size_t i = 0; i < substCount; i++)
 		{
 			substitutions[wsource[i]] = wtarget[i];
-
-			//auto utf8source = encoding::utf16_to_utf8(wstring(1, wsource[i]));
-			//auto utf8target = encoding::utf16_to_utf8(wstring(1, wtarget[i]));
-			//std::cout << "added substitution rule: " << utf8source << " -> " << utf8target << std::endl;
 		}
 
-		/*
-		auto utf8 = source;
-		auto utf16 = encoding::utf8_to_utf16(utf8);
-		auto sjis = encoding::utf16_to_shiftjis(utf16);
-		auto utf16again = encoding::shiftjis_to_utf16(sjis);
-		auto utf8again = encoding::utf16_to_utf8(utf16again);
-
-		utils::print_colored("utf8 from config file: ", FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		std::cout << std::dec << utf8.length() << " chars\n";
-		encoding::print_bytes(utf8);
-		utils::print_colored("converted to utf16: ", FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		std::cout << std::dec << utf16.length() << " wchars\n";
-		encoding::print_bytes(utf16);
-		utils::print_colored("converted to shift_jis: ", FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		std::cout << std::dec << sjis.length() << " chars\n";
-		encoding::print_bytes(sjis);
-		utils::print_colored("converted back to utf16: ", FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		std::cout << std::dec << utf16again.length() << " wchars\n";
-		encoding::print_bytes(utf16again);
-		utils::print_colored("converted back to utf8: ", FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		std::cout << std::dec << utf8again.length() << " chars\n";
-		encoding::print_bytes(utf8again);
-		*/
+		std::cout << *this << " Loaded " << substCount << " substitution characters\n";
 
 		hooks::hook_import(this, "TextOutA", TextOutAHook);
+		hooks::hook_import(this, "TextOutW", TextOutWHook);
+		hooks::hook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
+		hooks::hook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
 	}
 }
 
@@ -96,5 +87,8 @@ void uif::features::character_substitution::finalize()
 	if(enable)
 	{
 		hooks::unhook_import(this, "TextOutA", TextOutAHook);
+		hooks::unhook_import(this, "TextOutW", TextOutWHook);
+		hooks::unhook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
+		hooks::unhook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
 	}
 }

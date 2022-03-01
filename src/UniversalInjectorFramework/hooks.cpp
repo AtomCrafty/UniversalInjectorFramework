@@ -31,14 +31,20 @@ namespace uif::hooks
 		const features::feature_base* feature;
 		const char* importName;
 		void* hookFunction;
+		HMODULE targetModule;
 		bool success;
 		bool found;
-
-		// TODO
-		std::vector<const char*>* imports;
-		bool unhook;
-		bool multiple;
 	};
+
+	static std::string get_module_name(HMODULE hModule)
+	{
+		char dllNameBuffer[MAX_PATH];
+		GetModuleFileNameA(hModule, dllNameBuffer, MAX_PATH);
+		const char* dllName = strrchr(dllNameBuffer, '\\');
+		if(dllName == nullptr) dllName = dllNameBuffer;
+		else dllName++;
+		return dllName;
+	}
 
 	BOOL CALLBACK hook_import_enum_proc(PVOID pContext, DWORD nOrdinal, LPCSTR pszFunc, PVOID* ppvFunc)
 	{
@@ -50,14 +56,18 @@ namespace uif::hooks
 		if(!strcmp(pszFunc, info->importName))
 		{
 			info->found = true;
-			auto [iterator, notHooked] = hooked_imports.try_emplace(ppvFunc, hooked_import_info{ info->feature, ppvFunc });
-			if(!notHooked)
+			auto [iterator, success] = hooked_imports.try_emplace(ppvFunc, hooked_import_info{ info->feature, ppvFunc });
+			if(!success)
 			{
 				std::cout << *info->feature << dark_yellow(" Warning:") << " Unable to hook import " << yellow(pszFunc) << " because it has already been hooked by feature " << iterator->second.feature->name() << '\n';
 				return false;
 			}
 
-			std::cout << *info->feature << " Hooking import " << yellow(pszFunc) << " at " << blue(iterator->second.originalFunctionPointer) << green(" --> ") << blue(info->hookFunction) << '\n';
+			std::cout << *info->feature
+				<< " Hooking import " << yellow(pszFunc)
+				<< " in " << yellow(get_module_name(info->targetModule))
+				<< " at " << blue(iterator->second.originalFunctionPointer)
+				<< green(" --> ") << blue(info->hookFunction) << '\n';
 
 			info->success = true;
 			patch_protected(ppvFunc, info->hookFunction);
@@ -84,7 +94,12 @@ namespace uif::hooks
 				return false;
 			}
 
-			std::cout << *info->feature << " Unhooking import " << yellow(pszFunc) << " at " << blue(iterator->second.originalFunctionPointer) << red(" -/-> ") << blue(info->hookFunction) << '\n';
+			std::cout << *info->feature
+				<< " Unhooking import " << yellow(pszFunc)
+				<< " in " << yellow(get_module_name(info->targetModule))
+				<< " at " << blue(iterator->second.originalFunctionPointer)
+				<< red(" -/-> ") << blue(info->hookFunction) << '\n';
+
 			info->success = true;
 			patch_protected(ppvFunc, iterator->second.originalFunctionPointer);
 			return false;
@@ -95,11 +110,12 @@ namespace uif::hooks
 
 	bool hook_import(const features::feature_base* feature, const char* importName, void* hookFunction)
 	{
-		hook_import_info info{ feature, importName, hookFunction, false, false };
+		hook_import_info info{ feature, importName, hookFunction, injector::instance().game_module, false, false };
 
 		DetourEnumerateImportsEx(injector::instance().game_module, &info, nullptr, hook_import_enum_proc);
 		for(const auto module : injector::instance().additional_modules)
 		{
+			info.targetModule = module;
 			DetourEnumerateImportsEx(module, &info, nullptr, hook_import_enum_proc);
 		}
 
@@ -110,11 +126,12 @@ namespace uif::hooks
 
 	bool unhook_import(const features::feature_base* feature, const char* importName, void* hookFunction)
 	{
-		hook_import_info info{ feature, importName, hookFunction, false, false };
+		hook_import_info info{ feature, importName, hookFunction, injector::instance().game_module, false, false };
 
 		DetourEnumerateImportsEx(injector::instance().game_module, &info, nullptr, unhook_import_enum_proc);
 		for(const auto module : injector::instance().additional_modules)
 		{
+			info.targetModule = module;
 			DetourEnumerateImportsEx(module, &info, nullptr, unhook_import_enum_proc);
 		}
 
@@ -123,19 +140,7 @@ namespace uif::hooks
 		return info.success;
 	}
 
-	bool hook_imports(const features::feature_base* feature, const std::vector<std::pair<std::string, void*>>& hooks)
-	{
-		// TODO
-		return false;
-	}
-
-	bool unhook_imports(const features::feature_base* feature, const std::vector<std::pair<std::string, void*>>& hooks)
-	{
-		// TODO
-		return false;
-	}
-
-	bool hook_function(const features::feature_base* feature, void* targetFunction, void* hookFunction, const std::string& functionName = "")
+	bool hook_function(const features::feature_base* feature, void* targetFunction, void* hookFunction, const std::string& functionName)
 	{
 		auto [iterator, emplaced] = hooked_functions.try_emplace(targetFunction, hooked_function_info{ feature });
 		if(!emplaced)
@@ -158,7 +163,7 @@ namespace uif::hooks
 		return true;
 	}
 
-	bool unhook_function(const features::feature_base* feature, void* targetFunction, void* hookFunction, const std::string& functionName = "")
+	bool unhook_function(const features::feature_base* feature, void* targetFunction, void* hookFunction, const std::string& functionName)
 	{
 		const auto iterator = hooked_functions.find(targetFunction);
 

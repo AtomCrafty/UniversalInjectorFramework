@@ -31,6 +31,7 @@ namespace uif
 		static injector* _instance;
 		uif::config _config;
 		std::vector<features::feature_base*> features;
+		bool enabled;
 	};
 
 	template <typename T>

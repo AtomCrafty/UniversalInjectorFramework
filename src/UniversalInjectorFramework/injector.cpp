@@ -34,6 +34,12 @@ namespace uif
 
 	void injector::attach()
 	{
+		enabled = config().value("/injector/enable"_json_pointer, true);
+		if(!enabled) {
+			libraries::load();
+			return;
+		}
+		
 		initialize_feature<features::allocate_console>();
 
 		char exePath[MAX_PATH];
@@ -108,6 +114,8 @@ namespace uif
 
 	void injector::detach()
 	{
+		if(!enabled) return;
+
 		std::cout << white("[injector] ======================================================\n");
 		std::cout << white("[injector]") << " Detaching...\n";
 

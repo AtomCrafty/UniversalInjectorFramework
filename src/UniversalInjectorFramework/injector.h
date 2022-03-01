@@ -1,12 +1,9 @@
 #pragma once
 #include "config.h"
+#include "features/_feature_base.h"
 
 namespace uif
 {
-	namespace features {
-		class feature_base;
-	}
-
 	class injector
 	{
 	public:
@@ -21,12 +18,19 @@ namespace uif
 
 		HMODULE game_module;
 		std::vector<HMODULE> additional_modules{};
+		
+		template <typename T>
+		void initialize_feature()
+		{
+			features::feature_base* feature = new T(*this);
+			feature->initialize();
+			features.push_back(feature);
+		}
+
 	private:
 		static injector* _instance;
 		uif::config _config;
 		std::vector<features::feature_base*> features;
-
-		template<typename T> void initialize_feature();
 	};
 
 	template <typename T>

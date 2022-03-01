@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "start_suspended.h"
 
+#include "config.h"
+#include "hooks.h"
+
 void uif::features::start_suspended::initialize()
 {
 	if (config().value("/start_suspended/enable"_json_pointer, false) == true)

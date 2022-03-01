@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "play_timer.h"
 
+#include "config.h"
+#include "hooks.h"
+
+using json = nlohmann::json;
+
 void uif::features::play_timer::initialize()
 {
 	enable = config().value("/play_timer/enable"_json_pointer, false);

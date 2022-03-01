@@ -2,10 +2,11 @@
 #include "character_substitution.h"
 
 #include <codecvt>
-#include <corecrt_io.h>
 
+#include "config.h"
 #include "encoding.h"
 #include "hooks.h"
+#include "injector.h"
 
 static BOOL __stdcall TextOutWHook(HDC hdc, int x, int y, LPCWSTR lpString, int c) {
 	const auto& subst = uif::injector::instance().feature<uif::features::character_substitution>();

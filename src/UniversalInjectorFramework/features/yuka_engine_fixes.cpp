@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "yuka_engine_fixes.h"
 
+#include "config.h"
 #include "hooks.h"
+#include "utils.h"
 
 static void* (__cdecl* operator_new)(size_t Size);
 template<typename T>

@@ -2,6 +2,8 @@
 #include "allocate_console.h"
 
 #include "ansi.h"
+#include "config.h"
+#include "hooks.h"
 #include "utils.h"
 
 using namespace uif::ansi;

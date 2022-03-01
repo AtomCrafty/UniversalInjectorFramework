@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "injector.h"
 
 #include "ansi.h"
 #include "libraries.h"
@@ -30,14 +31,6 @@ namespace uif
 	config& injector::config()
 	{
 		return _config;
-	}
-
-	template <typename T>
-	void injector::initialize_feature()
-	{
-		features::feature_base* feature = new T(*this);
-		feature->initialize();
-		features.push_back(feature);
 	}
 
 	void injector::attach()

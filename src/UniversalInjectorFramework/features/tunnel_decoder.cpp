@@ -2,8 +2,10 @@
 #include "tunnel_decoder.h"
 
 #include "ansi.h"
+#include "config.h"
 #include "encoding.h"
 #include "hooks.h"
+#include "injector.h"
 
 using namespace uif::ansi;
 

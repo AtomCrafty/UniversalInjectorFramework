@@ -1,6 +1,10 @@
 #pragma once
-#include "injector.h"
-#include "config.h"
+
+namespace uif
+{
+	class injector;
+	class config;
+}
 
 namespace uif::features
 {
@@ -8,7 +12,13 @@ namespace uif::features
 	{
 	public:
 		explicit feature_base(injector& injector, std::string name) : _injector(injector), _name(std::move(name)) {}
+		explicit feature_base(feature_base&) = delete;
+		explicit feature_base(feature_base&&) = delete;
 		virtual ~feature_base() = default;
+
+		feature_base& operator=(const feature_base&) = delete;
+		feature_base& operator=(const feature_base&&) = delete;
+
 		virtual void initialize() = 0;
 		virtual void finalize() = 0;
 		

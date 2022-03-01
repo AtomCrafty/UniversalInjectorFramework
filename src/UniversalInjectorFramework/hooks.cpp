@@ -1,7 +1,9 @@
 ﻿#include "pch.h"
+#include "hooks.h"
 
 #include "ansi.h"
 #include "utils.h"
+#include "injector.h"
 #include "features/_feature_base.h"
 
 using namespace uif::ansi;

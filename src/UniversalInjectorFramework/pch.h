@@ -17,4 +17,3 @@
 
 #include "../Detours/detours.h"
 #include "json.hpp"
-using json = nlohmann::json;

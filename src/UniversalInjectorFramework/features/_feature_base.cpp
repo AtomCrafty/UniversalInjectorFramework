@@ -2,6 +2,7 @@
 #include "_feature_base.h"
 
 #include "ansi.h"
+#include "injector.h"
 
 using namespace uif::ansi;
 

@@ -1,8 +1,11 @@
 #include "pch.h"
 #include "font_manager.h"
 
+#include "config.h"
 #include "encoding.h"
 #include "hooks.h"
+#include "injector.h"
+#include "utils.h"
 
 #pragma region EnumFontFamiliesEx
 

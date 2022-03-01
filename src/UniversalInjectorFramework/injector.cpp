@@ -17,6 +17,7 @@
 #include "features/memory_patcher.h"
 #include "features/play_timer.h"
 #include "features/window_manager.h"
+#include "features/yuka_engine_fixes.h"
 
 using namespace uif::ansi;
 
@@ -131,6 +132,7 @@ namespace uif
 		initialize_feature<features::memory_patcher>();
 		initialize_feature<features::play_timer>();
 		initialize_feature<features::custom_feature>();
+		initialize_feature<features::yuka_engine_fixes>();
 
 		std::cout << white("[injector]") << green(" Initialization complete\n");
 		std::cout << white("[injector] ======================================================\n");

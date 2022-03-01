@@ -181,7 +181,6 @@
     <ClInclude Include="features\start_suspended.h" />
     <ClInclude Include="features\tunnel_decoder.h" />
     <ClInclude Include="utils.h" />
-    <ClInclude Include="features\yuka_engine_fixes.h" />
     <ClInclude Include="features\_feature_base.h" />
   </ItemGroup>
   <ItemGroup>
@@ -208,7 +207,6 @@
     <ClCompile Include="features\start_suspended.cpp" />
     <ClCompile Include="features\tunnel_decoder.cpp" />
     <ClCompile Include="utils.cpp" />
-    <ClCompile Include="features\yuka_engine_fixes.cpp" />
     <ClCompile Include="features\_feature_base.cpp" />
   </ItemGroup>
   <ItemGroup>

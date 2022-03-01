@@ -140,7 +140,7 @@ namespace uif::hooks
 		return info.success;
 	}
 
-	bool hook_function(const features::feature_base* feature, void* targetFunction, void* hookFunction, const std::string& functionName)
+	bool hook_function(const features::feature_base* feature, void*& targetFunction, void* hookFunction, const std::string& functionName)
 	{
 		auto [iterator, emplaced] = hooked_functions.try_emplace(targetFunction, hooked_function_info{ feature });
 		if(!emplaced)
@@ -163,7 +163,7 @@ namespace uif::hooks
 		return true;
 	}
 
-	bool unhook_function(const features::feature_base* feature, void* targetFunction, void* hookFunction, const std::string& functionName)
+	bool unhook_function(const features::feature_base* feature, void*& targetFunction, void* hookFunction, const std::string& functionName)
 	{
 		const auto iterator = hooked_functions.find(targetFunction);
 

@@ -1,0 +1,169 @@
+#pragma once
+
+namespace uif::calling_conventions
+{
+	enum class registers : char
+	{
+		none, eax, ebx, ecx, edx, esi, edi
+	};
+
+	// function_traits implementation adapted from
+	// https://devblogs.microsoft.com/oldnewthing/20200713-00/?p=103978
+	template<typename F> struct function_traits;
+
+	template<typename TReturn, typename... TArgs>
+	struct function_traits<TReturn(*)(TArgs...)>
+	{
+		using pointer = TReturn(*)(TArgs...);
+		using return_type = TReturn;
+		static constexpr std::size_t arg_count = sizeof...(TArgs);
+	};
+
+	template<typename TReturn>
+	struct function_traits<TReturn(*)()>
+	{
+		using pointer = TReturn(*)();
+		using return_type = TReturn;
+		static constexpr std::size_t arg_count = 0;
+	};
+
+	template<auto* FuncPtr, registers... Registers>
+	class calling_convention_adapter
+	{
+	public:
+		static void to_cdecl();
+	private:
+		template<registers Reg1, registers Reg2, registers Reg3, registers Reg4, registers Reg5, registers Reg6>
+		static void to_cdecl_impl();
+	};
+
+#define PushReg(Register) {\
+		if constexpr((Register) == registers::eax) __asm { push eax } \
+		if constexpr((Register) == registers::ebx) __asm { push ebx } \
+		if constexpr((Register) == registers::ecx) __asm { push ecx } \
+		if constexpr((Register) == registers::edx) __asm { push edx } \
+		if constexpr((Register) == registers::esi) __asm { push esi } \
+		if constexpr((Register) == registers::edi) __asm { push edi } \
+	}
+
+	template<auto* FuncPtr, registers... Registers>
+	void __cdecl calling_convention_adapter<FuncPtr, Registers...>::to_cdecl()
+	{
+		static_assert(sizeof...(Registers) <= 6, "There can be at most 6 register arguments");
+
+		if constexpr(sizeof...(Registers) == 6) to_cdecl_impl<Registers...>();
+		if constexpr(sizeof...(Registers) == 5) to_cdecl_impl<Registers..., registers::none>();
+		if constexpr(sizeof...(Registers) == 4) to_cdecl_impl<Registers..., registers::none, registers::none>();
+		if constexpr(sizeof...(Registers) == 3) to_cdecl_impl<Registers..., registers::none, registers::none, registers::none>();
+		if constexpr(sizeof...(Registers) == 2) to_cdecl_impl<Registers..., registers::none, registers::none, registers::none, registers::none>();
+		if constexpr(sizeof...(Registers) == 1) to_cdecl_impl<Registers..., registers::none, registers::none, registers::none, registers::none, registers::none>();
+		if constexpr(sizeof...(Registers) == 0) to_cdecl_impl<Registers..., registers::none, registers::none, registers::none, registers::none, registers::none, registers::none>();
+	}
+
+	template<auto* FuncPtr, registers... Registers>
+	template<registers Reg1, registers Reg2, registers Reg3, registers Reg4, registers Reg5, registers Reg6>
+	__declspec(naked) void __cdecl calling_convention_adapter<FuncPtr, Registers...>::to_cdecl_impl()
+	{
+		static constexpr auto FuncPtrVar = FuncPtr;
+		static constexpr int RegArgCount = sizeof...(Registers);
+		static constexpr int TotalArgCount = function_traits<decltype(FuncPtr)>::arg_count;
+		static constexpr int TotalArgSize = TotalArgCount * 4;
+		static constexpr int StackArgCount = TotalArgCount - RegArgCount;
+		static constexpr int StackArgOffset = StackArgCount * 4 + 4;
+
+		static_assert(RegArgCount <= TotalArgCount, "More argument locations that arguments");
+
+		__asm {
+			push ebp
+			mov ebp, esp
+		}
+
+		if constexpr(StackArgCount > 0)
+		{
+			__asm {
+				push esi
+				push edi
+
+				; Stack layout(assuming to_cdecl was optimized to a jump)
+				; EBP-08h  XXXXXXXX  Old EDI
+				; EBP-04h  XXXXXXXX  Old ESI
+				; EBP+00h  XXXXXXXX  Old EBP
+				; EBP+04h  XXXXXXXX  Return Address
+				; EBP+08h  11111111  Stack Argument 1
+				; EBP+0Ch  22222222  Stack Argument 2
+				; EBP+10h  33333333  Stack Argument 3
+
+				mov esi, ebp
+				add esi, StackArgOffset
+				mov edi, StackArgCount
+
+			copyArg:
+				push dword ptr [esi]
+				sub esi, 4
+				dec edi
+				jnz copyArg
+
+				mov edi, dword ptr [ebp-8]
+				mov esi, dword ptr [ebp-4]
+			}
+		}
+
+		if constexpr(sizeof...(Registers) >= 6) PushReg(Reg6);
+		if constexpr(sizeof...(Registers) >= 5) PushReg(Reg5);
+		if constexpr(sizeof...(Registers) >= 4) PushReg(Reg4);
+		if constexpr(sizeof...(Registers) >= 3) PushReg(Reg3);
+		if constexpr(sizeof...(Registers) >= 2) PushReg(Reg2);
+		if constexpr(sizeof...(Registers) >= 1) PushReg(Reg1);
+
+		__asm {
+			mov eax, FuncPtrVar
+			call eax
+		}
+
+		if constexpr(StackArgCount > 0) {
+			__asm {
+				add esp, TotalArgSize
+				pop edi
+				pop esi
+			}
+		}
+
+		__asm {
+			pop ebp
+			ret
+		}
+	}
+}
+
+/*
+#include <iostream>
+
+using namespace calling_conventions;
+
+void __cdecl func(size_t ecx, size_t edx, size_t stack1, size_t stack2, size_t stack3)
+{
+	std::cout
+		<< "ecx: " << ecx << ", "
+		<< "edx: " << edx << ", "
+		<< "stack1: " << stack1 << ", "
+		<< "stack2: " << stack2 << ", "
+		<< "stack3: " << stack3 << "\n";
+}
+
+int main()
+{
+	constexpr auto* a = calling_convention_adapter<func, registers::ecx, registers::edx>::to_cdecl;
+
+	volatile int x = 42;
+
+	__asm push 0x55555555
+	__asm push 0x44444444
+	__asm push 0x33333333
+	__asm mov edx, 0x22222222
+	__asm mov ecx, 0x11111111
+	a();
+	__asm add esp, 0Ch
+
+	std::cout << x << '\n';
+}
+*/

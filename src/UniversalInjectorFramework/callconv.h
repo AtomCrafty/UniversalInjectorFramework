@@ -37,6 +37,15 @@ namespace uif::calling_conventions
 		static void to_cdecl_impl();
 	};
 
+	template<auto* FuncPtr, registers... Registers>
+	using usercall_adapter = calling_convention_adapter<FuncPtr, false, Registers...>;
+
+	template<auto* FuncPtr, registers... Registers>
+	using userpurge_adapter = calling_convention_adapter<FuncPtr, true, Registers...>;
+
+	template<auto* FuncPtr>
+	using fastcall_adapter = calling_convention_adapter<FuncPtr, true, registers::ecx, registers::edx>;
+	
 #define PushReg(Register) {\
 		if constexpr((Register) == registers::eax) __asm { push eax } \
 		if constexpr((Register) == registers::ebx) __asm { push ebx } \

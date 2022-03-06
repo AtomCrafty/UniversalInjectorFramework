@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <type_traits>
 
 namespace uif::calling_conventions
@@ -76,14 +77,12 @@ namespace uif::calling_conventions
 	__declspec(naked) void __cdecl calling_convention_adapter<FuncPtrPtr, PurgeStack, Registers...>::to_cdecl_impl()
 	{
 		static constexpr auto FuncPtr = FuncPtrPtr;
-		static constexpr int RegArgCount = sizeof...(Registers);
-		static constexpr int TotalArgCount = function_traits<std::remove_pointer_t<decltype(FuncPtrPtr)>>::arg_count;
-		static constexpr int TotalArgSize = TotalArgCount * 4;
-		static constexpr int StackArgCount = TotalArgCount - RegArgCount;
-		static constexpr int StackArgSize = StackArgCount * 4;
-		static constexpr int StackArgOffset = StackArgSize + 4;
-
-		static_assert(RegArgCount <= TotalArgCount, "More argument locations that arguments");
+		static constexpr size_t TotalArgCount = function_traits<std::remove_pointer_t<decltype(FuncPtrPtr)>>::arg_count;
+		static constexpr size_t TotalArgSize = TotalArgCount * 4;
+		static constexpr size_t RegArgCount = std::min(TotalArgCount, sizeof...(Registers));
+		static constexpr size_t StackArgCount = TotalArgCount - RegArgCount;
+		static constexpr size_t StackArgSize = StackArgCount * 4;
+		static constexpr size_t StackArgOffset = StackArgSize + 4;
 
 		__asm {
 			push ebp
@@ -120,12 +119,12 @@ namespace uif::calling_conventions
 			}
 		}
 
-		if constexpr(sizeof...(Registers) >= 6) PushReg(Reg6);
-		if constexpr(sizeof...(Registers) >= 5) PushReg(Reg5);
-		if constexpr(sizeof...(Registers) >= 4) PushReg(Reg4);
-		if constexpr(sizeof...(Registers) >= 3) PushReg(Reg3);
-		if constexpr(sizeof...(Registers) >= 2) PushReg(Reg2);
-		if constexpr(sizeof...(Registers) >= 1) PushReg(Reg1);
+		if constexpr(RegArgCount >= 6) PushReg(Reg6);
+		if constexpr(RegArgCount >= 5) PushReg(Reg5);
+		if constexpr(RegArgCount >= 4) PushReg(Reg4);
+		if constexpr(RegArgCount >= 3) PushReg(Reg3);
+		if constexpr(RegArgCount >= 2) PushReg(Reg2);
+		if constexpr(RegArgCount >= 1) PushReg(Reg1);
 
 		__asm {
 			mov eax, FuncPtr

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 namespace uif::calling_conventions
 {
 	enum class registers : char
@@ -27,7 +29,7 @@ namespace uif::calling_conventions
 		static constexpr size_t arg_count = 0;
 	};
 
-	template<auto* FuncPtr, bool PurgeStack, registers... Registers>
+	template<auto* const* FuncPtrPtr, bool PurgeStack, registers... Registers>
 	class calling_convention_adapter
 	{
 	public:
@@ -37,14 +39,14 @@ namespace uif::calling_conventions
 		static void to_cdecl_impl();
 	};
 
-	template<auto* FuncPtr, registers... Registers>
-	using usercall_adapter = calling_convention_adapter<FuncPtr, false, Registers...>;
+	template<auto* const* FuncPtrPtr, registers... Registers>
+	using usercall_adapter = calling_convention_adapter<FuncPtrPtr, false, Registers...>;
 
-	template<auto* FuncPtr, registers... Registers>
-	using userpurge_adapter = calling_convention_adapter<FuncPtr, true, Registers...>;
+	template<auto* const* FuncPtrPtr, registers... Registers>
+	using userpurge_adapter = calling_convention_adapter<FuncPtrPtr, true, Registers...>;
 
-	template<auto* FuncPtr>
-	using fastcall_adapter = calling_convention_adapter<FuncPtr, true, registers::ecx, registers::edx>;
+	template<auto* const* FuncPtrPtr>
+	using fastcall_adapter = calling_convention_adapter<FuncPtrPtr, true, registers::ecx, registers::edx>;
 	
 #define PushReg(Register) {\
 		if constexpr((Register) == registers::eax) __asm { push eax } \
@@ -55,8 +57,8 @@ namespace uif::calling_conventions
 		if constexpr((Register) == registers::edi) __asm { push edi } \
 	}
 
-	template<auto* FuncPtr, bool PurgeStack, registers... Registers>
-	void __cdecl calling_convention_adapter<FuncPtr, PurgeStack, Registers...>::to_cdecl()
+	template<auto* const* FuncPtrPtr, bool PurgeStack, registers... Registers>
+	void __cdecl calling_convention_adapter<FuncPtrPtr, PurgeStack, Registers...>::to_cdecl()
 	{
 		static_assert(sizeof...(Registers) <= 6, "There can be at most 6 register arguments");
 
@@ -69,13 +71,13 @@ namespace uif::calling_conventions
 		if constexpr(sizeof...(Registers) == 0) to_cdecl_impl<Registers..., registers::none, registers::none, registers::none, registers::none, registers::none, registers::none>();
 	}
 
-	template<auto* FuncPtr, bool PurgeStack, registers... Registers>
+	template<auto* const* FuncPtrPtr, bool PurgeStack, registers... Registers>
 	template<registers Reg1, registers Reg2, registers Reg3, registers Reg4, registers Reg5, registers Reg6>
-	__declspec(naked) void __cdecl calling_convention_adapter<FuncPtr, PurgeStack, Registers...>::to_cdecl_impl()
+	__declspec(naked) void __cdecl calling_convention_adapter<FuncPtrPtr, PurgeStack, Registers...>::to_cdecl_impl()
 	{
-		static constexpr auto FuncPtrVar = FuncPtr;
+		static constexpr auto FuncPtr = FuncPtrPtr;
 		static constexpr int RegArgCount = sizeof...(Registers);
-		static constexpr int TotalArgCount = function_traits<decltype(FuncPtr)>::arg_count;
+		static constexpr int TotalArgCount = function_traits<std::remove_pointer_t<decltype(FuncPtrPtr)>>::arg_count;
 		static constexpr int TotalArgSize = TotalArgCount * 4;
 		static constexpr int StackArgCount = TotalArgCount - RegArgCount;
 		static constexpr int StackArgSize = StackArgCount * 4;
@@ -126,7 +128,7 @@ namespace uif::calling_conventions
 		if constexpr(sizeof...(Registers) >= 1) PushReg(Reg1);
 
 		__asm {
-			mov eax, FuncPtrVar
+			mov eax, FuncPtr
 			call eax
 		}
 
@@ -175,11 +177,13 @@ void __cdecl func(size_t ecx, size_t edx, size_t stack1, size_t stack2, size_t s
 
 int main()
 {
+	static constexpr auto* f = func;
+
 	// void (__userpurge *)(size_t ecx@<ecx>, size_t edx@<edx>, size_t stack1, size_t stack2, size_t stack3)
-	constexpr auto* userpurge = calling_convention_adapter<func, true, registers::ecx, registers::edx>::to_cdecl;
+	constexpr auto* userpurge = calling_convention_adapter<&f, true, registers::ecx, registers::edx>::to_cdecl;
 
 	// void (__usercall *)(size_t ecx@<esi>, size_t edx@<edi>, size_t stack1, size_t stack2, size_t stack3)
-	constexpr auto* usercall = calling_convention_adapter<func, false, registers::esi, registers::edi>::to_cdecl;
+	constexpr auto* usercall = calling_convention_adapter<&f, false, registers::esi, registers::edi>::to_cdecl;
 
 	volatile int x = 42;
 
@@ -203,4 +207,4 @@ int main()
 
 	std::cout << x << '\n';
 }
-*/
+//*/

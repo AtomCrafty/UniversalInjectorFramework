@@ -1,7 +1,12 @@
 #include "pch.h"
 #include "utils.h"
+
 #include <iostream>
 #include <fcntl.h>
+
+#include "ansi.h"
+
+using namespace uif::ansi;
 
 namespace uif::utils
 {
@@ -44,6 +49,45 @@ namespace uif::utils
 		VirtualProtect(patchAddress, sizeof(patchValue), PAGE_READWRITE, &origProtect);
 		*patchAddress = patchValue;
 		VirtualProtect(patchAddress, sizeof(patchValue), origProtect, &origProtect);
+	}
+
+	void* parse_address(const nlohmann::json& json)
+	{
+		if(json.is_string())
+			return parse_address(json.get<std::string>());
+
+		if(json.is_number_integer())
+			return reinterpret_cast<void*>(json.get<uintptr_t>());
+
+		std::cout << white("[injector]") << dark_red(" Error:") <<
+			" Failed to parse address " << blue('<') << blue(json.type_name()) << blue('>') << ": invalid json type\n";
+
+		return nullptr;
+	}
+
+	void* parse_address(const std::string& string)
+	{
+		const bool isHex = string.ends_with('h') || string.ends_with('H');
+		const size_t offsetStartIndex = string.find_last_of('+') + 1;
+		const std::string offsetString = string.substr(offsetStartIndex, string.length() - offsetStartIndex - isHex);
+
+		uintptr_t address = std::stoul(offsetString, nullptr, isHex ? 16 : 10);
+
+		if(offsetStartIndex != 0)
+		{
+			const std::string moduleName = string.substr(0, offsetStartIndex - 1);
+			const HMODULE hModule = GetModuleHandleA(moduleName.c_str());
+			if(!hModule)
+			{
+				std::cout << white("[injector]") << dark_red(" Error:") <<
+					" Failed to parse address " << blue(string) << ": unable to resolve module " << yellow(moduleName) << '\n';
+				return nullptr;
+			}
+
+			address += reinterpret_cast<uintptr_t>(hModule);
+		}
+
+		return reinterpret_cast<void*>(address);
 	}
 
 	void alloc_console()

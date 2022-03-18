@@ -53,7 +53,6 @@ static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, 
 
 void uif::features::character_substitution::initialize()
 {
-
 	if(config().value("/character_substitution/enable"_json_pointer, false) == true)
 	{
 		//std::cout << *this << " source: " << config().value("/character_substitution/source_characters"_json_pointer, "") << '\n';
@@ -68,7 +67,7 @@ void uif::features::character_substitution::initialize()
 		const std::wstring wsource = encoding::utf8_to_utf16(source);
 		const std::wstring wtarget = encoding::utf8_to_utf16(target);
 
-		const size_t substCount = min(wsource.length(), wtarget.length());
+		const size_t substCount = std::min(wsource.length(), wtarget.length());
 		for(size_t i = 0; i < substCount; i++)
 		{
 			substitutions[wsource[i]] = wtarget[i];

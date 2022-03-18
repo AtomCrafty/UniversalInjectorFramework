@@ -160,10 +160,12 @@
   <!--  -->
   <ItemGroup>
     <ClInclude Include="ansi.h" />
+    <ClInclude Include="callconv.h" />
     <ClInclude Include="features\allocate_console.h" />
     <ClInclude Include="features\character_substitution.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="features\file_monitor.h" />
+    <ClInclude Include="function_traits.h" />
     <ClInclude Include="proxies\d3d11.h" />
     <ClInclude Include="proxies\d3d8.h" />
     <ClInclude Include="proxies\d3d9.h" />

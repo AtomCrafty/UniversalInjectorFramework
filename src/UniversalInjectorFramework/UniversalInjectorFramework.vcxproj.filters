@@ -92,6 +92,12 @@
     <ClInclude Include="features\file_monitor.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
+    <ClInclude Include="callconv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="function_traits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

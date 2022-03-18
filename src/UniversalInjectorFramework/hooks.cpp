@@ -70,7 +70,7 @@ namespace uif::hooks
 				<< green(" --> ") << blue(info->hookFunction) << '\n';
 
 			info->success = true;
-			patch_protected(ppvFunc, info->hookFunction);
+			patch_address(ppvFunc, info->hookFunction);
 			return false;
 		}
 
@@ -101,7 +101,7 @@ namespace uif::hooks
 				<< red(" -/-> ") << blue(info->hookFunction) << '\n';
 
 			info->success = true;
-			patch_protected(ppvFunc, iterator->second.originalFunctionPointer);
+			patch_address(ppvFunc, iterator->second.originalFunctionPointer);
 			return false;
 		}
 

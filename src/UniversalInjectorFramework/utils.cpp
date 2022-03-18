@@ -30,7 +30,15 @@ namespace uif::utils
 		return true;
 	}
 
-	void patch_protected(void** patchAddress, void* patchValue)
+	void patch_memory(char* address, const char* data, size_t size)
+	{
+		DWORD origProtect;
+		VirtualProtect(address, size, PAGE_READWRITE, &origProtect);
+		memcpy(address, data, size);
+		VirtualProtect(address, size, origProtect, &origProtect);
+	}
+
+	void patch_address(void** patchAddress, void* patchValue)
 	{
 		DWORD origProtect;
 		VirtualProtect(patchAddress, sizeof(patchValue), PAGE_READWRITE, &origProtect);

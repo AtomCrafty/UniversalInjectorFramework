@@ -35,10 +35,11 @@ namespace uif::utils
 		return true;
 	}
 
-	void patch_memory(char* address, const char* data, size_t size)
+	void patch_memory(void* address, const void* data, size_t size, void* oldDataBuffer)
 	{
 		DWORD origProtect;
 		VirtualProtect(address, size, PAGE_READWRITE, &origProtect);
+		if(oldDataBuffer) memcpy(oldDataBuffer, address, size);
 		memcpy(address, data, size);
 		VirtualProtect(address, size, origProtect, &origProtect);
 	}

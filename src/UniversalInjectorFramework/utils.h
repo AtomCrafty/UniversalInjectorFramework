@@ -8,7 +8,7 @@ namespace uif::utils {
 	std::filesystem::path get_dll_path();
 	WORD set_console_color(WORD color);
 	void print_colored(const char* text, WORD color);
-	void patch_memory(char* address, const char* data, size_t size);
+	void patch_memory(void* address, const void* data, size_t size, void* oldDataBuffer);
 	void patch_address(void** patchAddress, void* patchValue);
 	void* parse_address(const nlohmann::json& json);
 	void* parse_address(const std::string& string);

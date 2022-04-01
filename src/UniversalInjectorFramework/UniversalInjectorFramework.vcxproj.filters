@@ -98,6 +98,9 @@
     <ClInclude Include="function_traits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="features\memory_patcher.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -164,6 +167,9 @@
       <Filter>Source Files\features</Filter>
     </ClCompile>
     <ClCompile Include="features\file_monitor.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\memory_patcher.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
   </ItemGroup>

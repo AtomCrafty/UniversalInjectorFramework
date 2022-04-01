@@ -10,6 +10,7 @@
 #include "features/tunnel_decoder.h"
 #include "features/file_monitor.h"
 #include "features/font_manager.h"
+#include "features/memory_patcher.h"
 #include "features/play_timer.h"
 
 using namespace uif::ansi;
@@ -39,7 +40,7 @@ namespace uif
 			libraries::load();
 			return;
 		}
-		
+
 		initialize_feature<features::allocate_console>();
 
 		char exePath[MAX_PATH];
@@ -73,7 +74,7 @@ namespace uif
 				}
 			}
 		}
-		
+
 		if(config().contains("/injector/hook_modules"_json_pointer))
 		{
 			auto& additionalHookModules = config()["/injector/hook_modules"_json_pointer];
@@ -106,6 +107,7 @@ namespace uif
 		initialize_feature<features::tunnel_decoder>();
 		initialize_feature<features::file_monitor>();
 		initialize_feature<features::font_manager>();
+		initialize_feature<features::memory_patcher>();
 		initialize_feature<features::play_timer>();
 
 		std::cout << white("[injector]") << green(" Initialization complete\n");

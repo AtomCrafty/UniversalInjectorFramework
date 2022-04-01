@@ -9,6 +9,7 @@
 #include "features/start_suspended.h"
 #include "features/character_substitution.h"
 #include "features/custom_feature.h"
+#include "features/flowers_engine_fixes.h"
 #include "features/tunnel_decoder.h"
 #include "features/file_monitor.h"
 #include "features/font_manager.h"
@@ -118,6 +119,7 @@ namespace uif
 
 		initialize_feature<features::start_suspended>();
 		initialize_feature<features::character_substitution>();
+		initialize_feature<features::flowers_engine_fixes>();
 		initialize_feature<features::tunnel_decoder>();
 		initialize_feature<features::file_monitor>();
 		initialize_feature<features::font_manager>();

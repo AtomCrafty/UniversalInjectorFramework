@@ -161,9 +161,9 @@ void uif::features::file_monitor::initialize()
 			}
 		}
 
-		if(actions.empty())
+		if(actions.empty() && !log_all)
 		{
-			std::cout << *this << dark_yellow(" Warning:") << " no actions specified, disabling tunnel decoder\n";
+			std::cout << *this << dark_yellow(" Warning:") << " no actions specified, disabling file monitor\n";
 			enabled = false;
 			return;
 		}

@@ -32,8 +32,7 @@ namespace uif::features
 		font_manager(uif::injector& injector) : feature_base(injector, "font_manager") { }
 		void initialize() override;
 		void finalize() override;
-
-		bool enabled = false;
+		
 		bool spoof_enumeration = false;
 		bool spoof_creation = false;
 

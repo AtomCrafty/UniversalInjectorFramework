@@ -233,126 +233,118 @@ HFONT __stdcall CreateFontIndirectExWHook(const ENUMLOGFONTEXDVW* lplf)
 
 void uif::features::font_manager::initialize()
 {
-	if(config().value("/font_manager/enable"_json_pointer, false))
+	if(config().contains("resource_files"))
 	{
-		enabled = true;
+		auto& resourceFiles = config()["resource_files"];
 
-		if(config().contains("/font_manager/resource_files"_json_pointer))
-		{
-			auto& resourceFiles = config()["/font_manager/resource_files"_json_pointer];
+		if(resourceFiles.is_array()) {
 
-			if(resourceFiles.is_array()) {
+			for(const auto& resourceFile : resourceFiles)
+			{
+				if(!resourceFile.is_string()) continue;
 
-				for(const auto& resourceFile : resourceFiles)
+				std::string fileName;
+				resourceFile.get_to(fileName);
+
+				if(const int result = AddFontResourceExA(fileName.c_str(), FR_PRIVATE, nullptr))
 				{
-					if(!resourceFile.is_string()) continue;
-
-					std::string fileName;
-					resourceFile.get_to(fileName);
-
-					if(const int result = AddFontResourceExA(fileName.c_str(), FR_PRIVATE, nullptr))
-					{
-						std::cout << *this << " Imported " << result << " font(s) from " << fileName << '\n';
-					}
-					else
-					{
-						std::cout << *this << " Failed to load fonts from " << fileName << '\n';
-					}
+					std::cout << *this << " Imported " << result << " font(s) from " << fileName << '\n';
+				}
+				else
+				{
+					std::cout << *this << " Failed to load fonts from " << fileName << '\n';
 				}
 			}
 		}
+	}
 
-		if(config().value("/font_manager/spoof_enumeration/enable"_json_pointer, false))
+	if(config().value("/spoof_enumeration/enable"_json_pointer, false))
+	{
+		spoof_enumeration = true;
+
+		if(config().contains("/spoof_enumeration/filter_pitch_and_family"_json_pointer))
 		{
-			spoof_enumeration = true;
-
-			if(config().contains("/font_manager/spoof_enumeration/filter_pitch_and_family"_json_pointer))
+			const auto& value = config()["/spoof_enumeration/filter_pitch_and_family"_json_pointer];
+			if(value.is_number())
 			{
-				const auto& value = config()["/font_manager/spoof_enumeration/filter_pitch_and_family"_json_pointer];
-				if(value.is_number())
-				{
-					enum_fonts_settings.filterPitchAndFamily = true;
-					enum_fonts_settings.filterPitchAndFamilyValue = value.get<BYTE>();
-				}
+				enum_fonts_settings.filterPitchAndFamily = true;
+				enum_fonts_settings.filterPitchAndFamilyValue = value.get<BYTE>();
 			}
-
-			if(config().contains("/font_manager/spoof_enumeration/filter_charset"_json_pointer))
-			{
-				const auto& value = config()["/font_manager/spoof_enumeration/filter_charset"_json_pointer];
-				if(value.is_number())
-				{
-					enum_fonts_settings.filterCharSet = true;
-					enum_fonts_settings.filterCharSetValue = value.get<BYTE>();
-				}
-			}
-
-			if(config().contains("/font_manager/spoof_enumeration/spoof_charset"_json_pointer))
-			{
-				const auto& value = config()["/font_manager/spoof_enumeration/spoof_charset"_json_pointer];
-				if(value.is_number())
-				{
-					enum_fonts_settings.spoofCharSet = true;
-					enum_fonts_settings.spoofCharSetValue = value.get<BYTE>();
-				}
-			}
-
-			hooks::hook_import(this, "EnumFontFamiliesExA", EnumFontFamiliesExAHook);
-			hooks::hook_import(this, "EnumFontFamiliesExW", EnumFontFamiliesExWHook);
 		}
 
-		if(config().value("/font_manager/spoof_creation/enable"_json_pointer, false))
+		if(config().contains("/spoof_enumeration/filter_charset"_json_pointer))
 		{
-			spoof_creation = true;
-
-			if(config().contains("/font_manager/spoof_creation/override_charset"_json_pointer))
+			const auto& value = config()["/spoof_enumeration/filter_charset"_json_pointer];
+			if(value.is_number())
 			{
-				const auto& value = config()["/font_manager/spoof_creation/override_charset"_json_pointer];
-				if(value.is_number())
-				{
-					create_font_settings.overrideCharSet = true;
-					create_font_settings.overrideCharSetValue = value.get<BYTE>();
-				}
+				enum_fonts_settings.filterCharSet = true;
+				enum_fonts_settings.filterCharSetValue = value.get<BYTE>();
 			}
-
-			if(config().contains("/font_manager/spoof_creation/override_face"_json_pointer))
-			{
-				const auto& value = config()["/font_manager/spoof_creation/override_face"_json_pointer];
-				if(value.is_string())
-				{
-					create_font_settings.overrideFace = true;
-					value.get_to(create_font_settings.overrideFaceValueA);
-					create_font_settings.overrideFaceValueW.assign(encoding::utf8_to_utf16(create_font_settings.overrideFaceValueA));
-				}
-			}
-
-			hooks::hook_import(this, "CreateFontA", CreateFontAHook);
-			hooks::hook_import(this, "CreateFontW", CreateFontWHook);
-			hooks::hook_import(this, "CreateFontIndirectA", CreateFontIndirectAHook);
-			hooks::hook_import(this, "CreateFontIndirectW", CreateFontIndirectWHook);
-			hooks::hook_import(this, "CreateFontIndirectExA", CreateFontIndirectExAHook);
-			hooks::hook_import(this, "CreateFontIndirectExW", CreateFontIndirectExWHook);
 		}
+
+		if(config().contains("/spoof_enumeration/spoof_charset"_json_pointer))
+		{
+			const auto& value = config()["/spoof_enumeration/spoof_charset"_json_pointer];
+			if(value.is_number())
+			{
+				enum_fonts_settings.spoofCharSet = true;
+				enum_fonts_settings.spoofCharSetValue = value.get<BYTE>();
+			}
+		}
+
+		hooks::hook_import(this, "EnumFontFamiliesExA", EnumFontFamiliesExAHook);
+		hooks::hook_import(this, "EnumFontFamiliesExW", EnumFontFamiliesExWHook);
+	}
+
+	if(config().value("/spoof_creation/enable"_json_pointer, false))
+	{
+		spoof_creation = true;
+
+		if(config().contains("/spoof_creation/override_charset"_json_pointer))
+		{
+			const auto& value = config()["/spoof_creation/override_charset"_json_pointer];
+			if(value.is_number())
+			{
+				create_font_settings.overrideCharSet = true;
+				create_font_settings.overrideCharSetValue = value.get<BYTE>();
+			}
+		}
+
+		if(config().contains("/spoof_creation/override_face"_json_pointer))
+		{
+			const auto& value = config()["/spoof_creation/override_face"_json_pointer];
+			if(value.is_string())
+			{
+				create_font_settings.overrideFace = true;
+				value.get_to(create_font_settings.overrideFaceValueA);
+				create_font_settings.overrideFaceValueW.assign(encoding::utf8_to_utf16(create_font_settings.overrideFaceValueA));
+			}
+		}
+
+		hooks::hook_import(this, "CreateFontA", CreateFontAHook);
+		hooks::hook_import(this, "CreateFontW", CreateFontWHook);
+		hooks::hook_import(this, "CreateFontIndirectA", CreateFontIndirectAHook);
+		hooks::hook_import(this, "CreateFontIndirectW", CreateFontIndirectWHook);
+		hooks::hook_import(this, "CreateFontIndirectExA", CreateFontIndirectExAHook);
+		hooks::hook_import(this, "CreateFontIndirectExW", CreateFontIndirectExWHook);
 	}
 }
 
 void uif::features::font_manager::finalize()
 {
-	if(enabled)
+	if(spoof_enumeration)
 	{
-		if(spoof_enumeration)
-		{
-			hooks::unhook_import(this, "EnumFontFamiliesExA", EnumFontFamiliesExAHook);
-			hooks::unhook_import(this, "EnumFontFamiliesExW", EnumFontFamiliesExWHook);
-		}
+		hooks::unhook_import(this, "EnumFontFamiliesExA", EnumFontFamiliesExAHook);
+		hooks::unhook_import(this, "EnumFontFamiliesExW", EnumFontFamiliesExWHook);
+	}
 
-		if(spoof_creation)
-		{
-			hooks::unhook_import(this, "CreateFontA", CreateFontAHook);
-			hooks::unhook_import(this, "CreateFontW", CreateFontWHook);
-			hooks::unhook_import(this, "CreateFontIndirectA", CreateFontIndirectAHook);
-			hooks::unhook_import(this, "CreateFontIndirectW", CreateFontIndirectWHook);
-			hooks::unhook_import(this, "CreateFontIndirectExA", CreateFontIndirectExAHook);
-			hooks::unhook_import(this, "CreateFontIndirectExW", CreateFontIndirectExWHook);
-		}
+	if(spoof_creation)
+	{
+		hooks::unhook_import(this, "CreateFontA", CreateFontAHook);
+		hooks::unhook_import(this, "CreateFontW", CreateFontWHook);
+		hooks::unhook_import(this, "CreateFontIndirectA", CreateFontIndirectAHook);
+		hooks::unhook_import(this, "CreateFontIndirectW", CreateFontIndirectWHook);
+		hooks::unhook_import(this, "CreateFontIndirectExA", CreateFontIndirectExAHook);
+		hooks::unhook_import(this, "CreateFontIndirectExW", CreateFontIndirectExWHook);
 	}
 }

@@ -12,7 +12,5 @@ namespace uif::utils {
 	void patch_address(void** patchAddress, void* patchValue);
 	void* parse_address(const nlohmann::json& json);
 	void* parse_address(const std::string& string);
-	void alloc_console();
-	void focus_console();
 	[[noreturn]] void fail(const std::string& reason);
 }

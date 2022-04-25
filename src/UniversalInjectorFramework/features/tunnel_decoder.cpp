@@ -33,44 +33,24 @@ int __stdcall MultiByteToWideCharHook(UINT CodePage, DWORD dwFlags, LPCCH lpMult
 
 void uif::features::tunnel_decoder::initialize()
 {
-	if(config().value("/tunnel_decoder/enable"_json_pointer, false))
+	if(!config()["mapping"].is_string())
 	{
-		enabled = true;
-
-		if(config().contains("/tunnel_decoder/mapping"_json_pointer))
-		{
-			const auto& value = config()["/tunnel_decoder/mapping"_json_pointer];
-			if(value.is_string())
-			{
-				mapping = encoding::utf8_to_utf16(value.get<std::string>());
-				std::cout << *this << " Loaded " << mapping.length() << " mapping characters\n";
-			}
-			else
-			{
-				std::cout << *this << dark_red(" Error:") << " no mapping specified, disabling tunnel decoder\n";
-				enabled = false;
-				return;
-			}
-		}
-		else
-		{
-			std::cout << *this << dark_red(" Error:") << " no mapping specified, disabling tunnel decoder\n";
-			enabled = false;
-			return;
-		}
-
-		hooks::hook_import(this, "TextOutA", TextOutAHook);
-		hooks::hook_import(this, "MultiByteToWideChar", MultiByteToWideCharHook);
+		std::cout << *this << dark_red(" Error:") << " no mapping specified, disabling tunnel decoder\n";
+		_enabled = false;
+		return;
 	}
+
+	mapping = encoding::utf8_to_utf16(config()["mapping"].get<std::string>());
+	std::cout << *this << " Loaded " << mapping.length() << " mapping characters\n";
+
+	hooks::hook_import(this, "TextOutA", TextOutAHook);
+	hooks::hook_import(this, "MultiByteToWideChar", MultiByteToWideCharHook);
 }
 
 void uif::features::tunnel_decoder::finalize()
 {
-	if(enabled)
-	{
-		hooks::unhook_import(this, "TextOutA", TextOutAHook);
-		hooks::unhook_import(this, "MultiByteToWideChar", MultiByteToWideCharHook);
-	}
+	hooks::unhook_import(this, "TextOutA", TextOutAHook);
+	hooks::unhook_import(this, "MultiByteToWideChar", MultiByteToWideCharHook);
 }
 
 // shift-jis tunnel decoder logic courtesy of https://github.com/arcusmaximus

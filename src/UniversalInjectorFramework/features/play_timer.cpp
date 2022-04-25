@@ -8,24 +8,18 @@ using json = nlohmann::json;
 
 void uif::features::play_timer::initialize()
 {
-	enable = config().value("/play_timer/enable"_json_pointer, false);
-	if (enable)
-	{
-		start_time = epoch_time();
-		save_file_path = config().value("/play_timer/save_file_path"_json_pointer, "play_timer.json");
+	start_time = epoch_time();
+	save_file_path = config().value("save_file_path", "play_timer.json");
 
-		auto_save_enable = config().value("/play_timer/auto_save/enable"_json_pointer, false);
-		if (auto_save_enable) {
-			auto_save_interval = config().value("/play_timer/auto_save/interval"_json_pointer, 60);
-			auto_save_start();
-		}
+	auto_save_enable = config().value("auto_save/enable"_json_pointer, false);
+	if(auto_save_enable) {
+		auto_save_interval = config().value("auto_save/interval"_json_pointer, 60);
+		auto_save_start();
 	}
 }
 
 void uif::features::play_timer::finalize()
 {
-	if(!enable) return;
-	
 	auto_save_stop();
 	end_time = epoch_time();
 	write_save_file();
@@ -36,9 +30,9 @@ void uif::features::play_timer::auto_save_start()
 	auto_save_enable = true;
 	auto_save_thread = std::thread([this]()
 		{
-			while (auto_save_enable) {
+			while(auto_save_enable) {
 				write_save_file();
-				std::unique_lock<std::mutex> lk(auto_save_mutex);
+				std::unique_lock lk(auto_save_mutex);
 				auto_save_stop_signal.wait_for(lk, std::chrono::seconds(auto_save_interval));
 			}
 		});
@@ -46,10 +40,10 @@ void uif::features::play_timer::auto_save_start()
 
 void uif::features::play_timer::auto_save_stop()
 {
-	if (auto_save_enable) {
+	if(auto_save_enable) {
 		auto_save_enable = false;
 		{
-			std::lock_guard<std::mutex> _(auto_save_mutex);
+			std::lock_guard _(auto_save_mutex);
 			auto_save_stop_signal.notify_one();
 		}
 		auto_save_thread.join();
@@ -62,13 +56,13 @@ void uif::features::play_timer::write_save_file() const
 	json data;
 	std::ifstream in;
 	in.open(save_file_path);
-	if (in.is_open())
+	if(in.is_open())
 	{
 		try
 		{
 			in >> data;
 		}
-		catch (nlohmann::json::parse_error& error)
+		catch(nlohmann::json::parse_error& error)
 		{
 			std::cout << "Failed to read play timer save file (" << save_file_path << "): " << error.what() << std::endl;
 		}
@@ -79,13 +73,13 @@ void uif::features::play_timer::write_save_file() const
 		data = json({});
 	}
 
-	if (!data.contains("times"))
+	if(!data.contains("times"))
 	{
 		data["times"] = json::array();
 	}
 
 	const bool was_active = data.value("active", false);
-	if (was_active && data["active_start"] != start_time)
+	if(was_active && data["active_start"] != start_time)
 	{
 		std::cout << "Found stale active marker. The app didn't exit properly last time." << std::endl;
 		data["times"].emplace_back(json({
@@ -95,7 +89,7 @@ void uif::features::play_timer::write_save_file() const
 	}
 
 	const bool is_active = end_time == -1;
-	if (is_active)
+	if(is_active)
 	{
 		data["active"] = true;
 		data["active_start"] = start_time;
@@ -114,7 +108,7 @@ void uif::features::play_timer::write_save_file() const
 	}
 
 	long long total_time = 0;
-	for (auto time_entry : data["times"])
+	for(auto time_entry : data["times"])
 	{
 		long long duration = time_entry["duration"];
 		total_time += duration;
@@ -123,7 +117,7 @@ void uif::features::play_timer::write_save_file() const
 
 	std::ofstream out;
 	out.open(save_file_path);
-	if (!out.is_open())
+	if(!out.is_open())
 	{
 		std::cout << "Failed to write play timer save file (" << save_file_path << ")" << std::endl;
 		return;

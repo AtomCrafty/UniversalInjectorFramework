@@ -53,42 +53,32 @@ static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, 
 
 void uif::features::character_substitution::initialize()
 {
-	if(config().value("/character_substitution/enable"_json_pointer, false) == true)
+	substitutions = std::map<wchar_t, wchar_t>();
+
+	const std::string source = config().value("source_characters", "");
+	const std::string target = config().value("target_characters", "");
+
+	const std::wstring wsource = encoding::utf8_to_utf16(source);
+	const std::wstring wtarget = encoding::utf8_to_utf16(target);
+
+	const size_t substCount = std::min(wsource.length(), wtarget.length());
+	for(size_t i = 0; i < substCount; i++)
 	{
-		//std::cout << *this << " source: " << config().value("/character_substitution/source_characters"_json_pointer, "") << '\n';
-		//std::cout << *this << " target: " << config().value("/character_substitution/target_characters"_json_pointer, "") << '\n';
-
-		enable = true;
-		substitutions = std::map<wchar_t, wchar_t>();
-
-		const std::string source = config().value("/character_substitution/source_characters"_json_pointer, "");
-		const std::string target = config().value("/character_substitution/target_characters"_json_pointer, "");
-
-		const std::wstring wsource = encoding::utf8_to_utf16(source);
-		const std::wstring wtarget = encoding::utf8_to_utf16(target);
-
-		const size_t substCount = std::min(wsource.length(), wtarget.length());
-		for(size_t i = 0; i < substCount; i++)
-		{
-			substitutions[wsource[i]] = wtarget[i];
-		}
-
-		std::cout << *this << " Loaded " << substCount << " substitution characters\n";
-
-		hooks::hook_import(this, "TextOutA", TextOutAHook);
-		hooks::hook_import(this, "TextOutW", TextOutWHook);
-		hooks::hook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
-		hooks::hook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
+		substitutions[wsource[i]] = wtarget[i];
 	}
+
+	std::cout << *this << " Loaded " << substCount << " substitution characters\n";
+
+	hooks::hook_import(this, "TextOutA", TextOutAHook);
+	hooks::hook_import(this, "TextOutW", TextOutWHook);
+	hooks::hook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
+	hooks::hook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
 }
 
 void uif::features::character_substitution::finalize()
 {
-	if(enable)
-	{
-		hooks::unhook_import(this, "TextOutA", TextOutAHook);
-		hooks::unhook_import(this, "TextOutW", TextOutWHook);
-		hooks::unhook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
-		hooks::unhook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
-	}
+	hooks::unhook_import(this, "TextOutA", TextOutAHook);
+	hooks::unhook_import(this, "TextOutW", TextOutWHook);
+	hooks::unhook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
+	hooks::unhook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
 }

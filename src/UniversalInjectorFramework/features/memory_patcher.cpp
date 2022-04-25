@@ -4,25 +4,20 @@
 #include "ansi.h"
 #include "callconv.h"
 #include "config.h"
-#include "encoding.h"
 #include "hooks.h"
-#include "injector.h"
 #include "utils.h"
 
 using namespace uif::ansi;
 
 void uif::features::memory_patcher::initialize()
 {
-	if(!config().value("/memory_patcher/enable"_json_pointer, false))
-		return;
-
-	if(!config().contains("/memory_patcher/patches"_json_pointer))
+	if(!config().contains("patches"))
 	{
 		std::cout << *this << dark_yellow(" Warning:") << " no patches specified\n";
 		return;
 	}
 
-	auto& patchTable = config()["/memory_patcher/patches"_json_pointer];
+	auto& patchTable = config()["patches"];
 
 	if(!patchTable.is_object()) {
 		std::cout << *this << dark_red(" Error:") << " expected object\n";

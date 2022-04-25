@@ -23,8 +23,14 @@ namespace uif
 		void initialize_feature()
 		{
 			features::feature_base* feature = new T(*this);
-			feature->initialize();
-			features.push_back(feature);
+			if(feature->try_init())
+			{
+				features.push_back(feature);
+			}
+			else
+			{
+				delete feature;
+			}
 		}
 
 	private:

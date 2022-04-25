@@ -91,39 +91,6 @@ namespace uif::utils
 		return reinterpret_cast<void*>(address);
 	}
 
-	void alloc_console()
-	{
-		// try to reuse the existing console
-		if(!AttachConsole(ATTACH_PARENT_PROCESS))
-		{
-			if(!AllocConsole())
-			{
-				fail("Failed to allocate console.");
-			}
-		}
-		SetConsoleOutputCP(65001);
-
-		FILE* _;
-		freopen_s(&_, "CONOUT$", "w", stdout);
-		freopen_s(&_, "CONOUT$", "w", stderr);
-		freopen_s(&_, "CONIN$", "r", stdin);
-		std::cout.clear();
-		std::clog.clear();
-		std::cerr.clear();
-		std::cin.clear();
-
-		// this does not seem to work :/
-		//HANDLE hConOut = CreateFile(L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		//HANDLE hConIn = CreateFile(L"CONIN$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		//SetStdHandle(STD_OUTPUT_HANDLE, hConOut);
-		//SetStdHandle(STD_ERROR_HANDLE, hConOut);
-		//SetStdHandle(STD_INPUT_HANDLE, hConIn);
-		//std::wcout.clear();
-		//std::wclog.clear();
-		//std::wcerr.clear();
-		//std::wcin.clear();
-	}
-
 	std::filesystem::path get_dll_path()
 	{
 		TCHAR path[MAX_PATH];
@@ -154,17 +121,10 @@ namespace uif::utils
 		set_console_color(prev);
 	}
 
-	void focus_console()
-	{
-		auto* const window = GetConsoleWindow();
-		if(window == nullptr) return;
-		SetForegroundWindow(window);
-	}
-
 	[[noreturn]]
 	void fail(const std::string& reason)
 	{
 		MessageBoxA(nullptr, reason.c_str(), "Universal Injector", MB_OK | MB_ICONERROR);
-		exit(-1);
+		ExitProcess(-1);
 	}
 }

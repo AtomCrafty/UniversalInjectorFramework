@@ -124,6 +124,7 @@ namespace uif
 		for(auto* feature : features)
 		{
 			feature->finalize();
+			delete feature;
 		}
 		features.clear();
 

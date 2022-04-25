@@ -92,94 +92,86 @@ HANDLE __stdcall CreateFileAHook(
 
 void uif::features::file_monitor::initialize()
 {
-	if(config().value("/file_monitor/enable"_json_pointer, false))
+	log_all = config().value("log_all", false);
+
+	if(config().contains("actions"))
 	{
-		enabled = true;
-
-		log_all = config().value("/file_monitor/log_all"_json_pointer, false);
-
-		if(config().contains("/file_monitor/actions"_json_pointer))
+		const auto& actionArray = config()["actions"];
+		if(actionArray.is_array())
 		{
-			const auto& actionArray = config()["/file_monitor/actions"_json_pointer];
-			if(actionArray.is_array())
+			for(auto& actionObject : actionArray)
 			{
-				for(auto& actionObject : actionArray)
-				{
-					if(!actionObject.is_object()) {
-						std::cout << *this << dark_red(" Error:") << " expected object\n";
-						continue;
-					}
-
-					const auto& pattern = encoding::utf8_to_utf16(actionObject.value("pattern", ""));
-					const auto& path = encoding::utf8_to_utf16(actionObject.value("path", ""));
-
-					if(path.empty() && pattern.empty())
-					{
-						std::cout << *this << dark_red(" Error:") << " no path or pattern specified\n";
-						continue;
-					}
-
-					if(!path.empty() && !pattern.empty())
-					{
-						std::cout << *this << dark_yellow(" Warning:") << " both a path and a pattern specified. the pattern will be used\n";
-					}
-
-					std::wregex regex = pattern.empty() ? build_path_pattern(path) : std::wregex(pattern);
-					const auto& redirectPath = encoding::utf8_to_utf16(actionObject.value("redirect", ""));
-					const auto& accessFilterString = actionObject.value("access", "");
-					const bool breakpoint = actionObject.value("breakpoint", false);
-					const bool log = actionObject.value("log", false);
-
-					DWORD accessFilter = 0;
-					for(const char ch : accessFilterString)
-					{
-						switch(ch)
-						{
-						case 'r':
-						case 'R':
-							accessFilter |= GENERIC_READ;
-							break;
-						case 'w':
-						case 'W':
-							accessFilter |= GENERIC_WRITE;
-							break;
-						case 'x':
-						case 'X':
-							accessFilter |= GENERIC_EXECUTE;
-							break;
-						default:
-							break;
-						}
-					}
-
-					actions.push_back({ std::move(regex), redirectPath, accessFilter, breakpoint, log });
+				if(!actionObject.is_object()) {
+					std::cout << *this << dark_red(" Error:") << " expected object\n";
+					continue;
 				}
-			}
-			else
-			{
-				std::cout << *this << dark_red(" Error:") << " expected array\n";
+
+				const auto& pattern = encoding::utf8_to_utf16(actionObject.value("pattern", ""));
+				const auto& path = encoding::utf8_to_utf16(actionObject.value("path", ""));
+
+				if(path.empty() && pattern.empty())
+				{
+					std::cout << *this << dark_red(" Error:") << " no path or pattern specified\n";
+					continue;
+				}
+
+				if(!path.empty() && !pattern.empty())
+				{
+					std::cout << *this << dark_yellow(" Warning:") << " both a path and a pattern specified. the pattern will be used\n";
+				}
+
+				std::wregex regex = pattern.empty() ? build_path_pattern(path) : std::wregex(pattern);
+				const auto& redirectPath = encoding::utf8_to_utf16(actionObject.value("redirect", ""));
+				const auto& accessFilterString = actionObject.value("access", "");
+				const bool breakpoint = actionObject.value("breakpoint", false);
+				const bool log = actionObject.value("log", false);
+
+				DWORD accessFilter = 0;
+				for(const char ch : accessFilterString)
+				{
+					switch(ch)
+					{
+					case 'r':
+					case 'R':
+						accessFilter |= GENERIC_READ;
+						break;
+					case 'w':
+					case 'W':
+						accessFilter |= GENERIC_WRITE;
+						break;
+					case 'x':
+					case 'X':
+						accessFilter |= GENERIC_EXECUTE;
+						break;
+					default:
+						break;
+					}
+				}
+
+				actions.push_back({ std::move(regex), redirectPath, accessFilter, breakpoint, log });
 			}
 		}
-
-		if(actions.empty() && !log_all)
+		else
 		{
-			std::cout << *this << dark_yellow(" Warning:") << " no actions specified, disabling file monitor\n";
-			enabled = false;
-			return;
+			std::cout << *this << dark_red(" Error:") << " expected array\n";
 		}
-
-		hooks::hook_import(this, "CreateFileA", CreateFileAHook);
-		hooks::hook_import(this, "CreateFileW", CreateFileWHook);
 	}
+
+	if(actions.empty() && !log_all)
+	{
+		std::cout << *this << dark_yellow(" Warning:") << " no actions specified, disabling file monitor\n";
+		_enabled = false;
+		return;
+	}
+
+	hooks::hook_import(this, "CreateFileA", CreateFileAHook);
+	hooks::hook_import(this, "CreateFileW", CreateFileWHook);
 }
 
 void uif::features::file_monitor::finalize()
 {
-	if(enabled)
-	{
-		hooks::unhook_import(this, "CreateFileA", CreateFileAHook);
-		hooks::unhook_import(this, "CreateFileW", CreateFileWHook);
-	}
+	hooks::unhook_import(this, "CreateFileA", CreateFileAHook);
+	hooks::unhook_import(this, "CreateFileW", CreateFileWHook);
 }
 
 std::wregex uif::features::file_monitor::build_path_pattern(const std::wstring& path)
@@ -231,7 +223,7 @@ std::wregex uif::features::file_monitor::build_path_pattern(const std::wstring& 
 
 uif::features::file_monitor::file_action* uif::features::file_monitor::get_action(std::wstring path, DWORD desiredAccess)
 {
-	std::replace(path.begin(), path.end(), L'\\', L'/');
+	std::ranges::replace(path, L'\\', L'/');
 	for(auto& action : actions)
 	{
 		if(std::regex_match(path, action.path_pattern))

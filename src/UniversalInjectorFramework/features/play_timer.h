@@ -10,8 +10,6 @@ namespace uif::features
 		void initialize() override;
 		void finalize() override;
 		
-		bool enable = false;
-		
 	private:
 		long long start_time = -1;
 		long long end_time = -1;

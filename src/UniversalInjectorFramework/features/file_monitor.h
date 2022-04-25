@@ -22,8 +22,7 @@ namespace uif::features {
 		};
 
 		file_action* get_action(std::wstring path, DWORD desiredAccess);
-
-		bool enabled = false;
+		
 		bool log_all = false;
 		std::vector<file_action> actions;
 

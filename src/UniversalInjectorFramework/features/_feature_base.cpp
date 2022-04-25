@@ -6,19 +6,23 @@
 
 using namespace uif::ansi;
 
-uif::injector& uif::features::feature_base::injector() const
+uif::features::feature_base::feature_base(uif::injector& injector, std::string name) :
+	_injector(injector),
+	_config(_injector.config()[name]),
+	_name(std::move(name))
 {
-	return _injector;
 }
 
-uif::config& uif::features::feature_base::config() const
+bool uif::features::feature_base::try_init()
 {
-	return injector().config();
+	_enabled = pre_init();
+	if(_enabled) initialize();
+	return _enabled;
 }
 
-const std::string& uif::features::feature_base::name() const
+bool uif::features::feature_base::pre_init()
 {
-	return _name;
+	return config().is_object() && config().value("enable", false);
 }
 
 std::ostream& uif::features::operator<<(std::ostream& os, const feature_base& feature)

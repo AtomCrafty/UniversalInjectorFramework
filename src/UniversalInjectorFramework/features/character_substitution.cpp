@@ -33,6 +33,8 @@ static BOOL __stdcall TextOutAHook(HDC hdc, int x, int y, LPCSTR lpString, int c
 
 static DWORD  __stdcall GetGlyphOutlineWHook(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, MAT2* lpmat2)
 {
+	//std::wcout << std::setw(4) << std::hex << uChar << std::dec << std::setw(0) << ' ' << *reinterpret_cast<wchar_t*>(&uChar) << '\n';
+
 	const auto& subst = uif::injector::instance().feature<uif::features::character_substitution>();
 	const auto& map = subst.substitutions;
 
@@ -46,8 +48,19 @@ static DWORD  __stdcall GetGlyphOutlineWHook(HDC hdc, UINT uChar, UINT fuFormat,
 }
 
 static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, MAT2* lpmat2) {
-	const char a[3] = { static_cast<char>(uChar), static_cast<char>(uChar >> 8), 0 };
+	char a[3] = { 0 };
+	if(uChar < 0x100)
+	{
+		a[0] = static_cast<char>(uChar);
+	}
+	else
+	{
+		a[0] = static_cast<char>(uChar >> 8);
+		a[1] = static_cast<char>(uChar);
+	}
+
 	const auto s = encoding::shiftjis_to_utf16(a);
+
 	return GetGlyphOutlineWHook(hdc, s[0], fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
 }
 

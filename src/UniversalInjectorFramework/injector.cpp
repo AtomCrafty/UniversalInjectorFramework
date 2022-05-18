@@ -35,6 +35,9 @@ namespace uif
 
 	void injector::attach()
 	{
+		if(attached) return;
+		attached = true;
+
 		enabled = config().value("/injector/enable"_json_pointer, true);
 		if(!enabled) {
 			libraries::load();
@@ -117,6 +120,8 @@ namespace uif
 	void injector::detach()
 	{
 		if(!enabled) return;
+		if(!attached) return;
+		attached = false;
 
 		std::cout << white("[injector] ======================================================\n");
 		std::cout << white("[injector]") << " Detaching...\n";

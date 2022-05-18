@@ -16,7 +16,7 @@ static void alloc_console()
 	{
 		if(!AllocConsole())
 		{
-			uif::utils::fail("Failed to allocate console.");
+			uif::utils::fail(std::string("Failed to allocate console: ") + std::to_string(GetLastError()));
 		}
 	}
 

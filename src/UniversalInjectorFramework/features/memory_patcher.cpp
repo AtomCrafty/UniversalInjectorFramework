@@ -2,7 +2,6 @@
 #include "memory_patcher.h"
 
 #include "ansi.h"
-#include "callconv.h"
 #include "config.h"
 #include "hooks.h"
 #include "utils.h"

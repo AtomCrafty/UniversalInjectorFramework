@@ -19,11 +19,12 @@ namespace omega {
 	const int OptionLineHeight = 30;
 	const int OptionTextBoxWidth = 250;
 
-	/* Types */
+#pragma region Types
 
 	struct Texture;
 	struct Layer;
 	struct SGame;
+	struct Font;
 
 	struct Texture_vtable
 	{
@@ -130,6 +131,65 @@ namespace omega {
 		int field_C8;
 	};
 
+	struct ExtendedLayerData
+	{
+		int field_0;
+		int field_4;
+		int(__cdecl* Execute)(Layer* layer, const wchar_t* name, int, int);
+		wchar_t* text;
+		int textColor;
+		int shadowColor;
+		LOGFONTW logFont;
+		int marginX;
+		int marginY;
+		int cursorX;
+		int cursorY;
+		Font* font;
+	};
+
+	struct GlyphInfo
+	{
+		RECT cellPos;
+		int stride;
+		int* buffer;
+	};
+
+	struct Font_vtable
+	{
+		int(__thiscall* Reset)(Font* _this, const wchar_t* face, int size, bool italic, int, int);
+		void(__thiscall* SetRenderTarget)(Font* font, int* buffer, int x, int y, int width, int height);
+		int field_8;
+		int field_C;
+		int field_10;
+		void(__thiscall* Render)(Font* _this, SIZE* pCursorDelta, int x, int y, int textColor, wchar_t* text);
+		void(__thiscall* SetDC)(Font* _this, HDC hdc);
+		int ResetPrevFont;
+		int field_20;
+		DWORD(__thiscall* RenderGlyph)(Font* _this, HDC hdc, wchar_t c, LPGLYPHMETRICS lpgm, DWORD* a5, bool gray);
+		bool(__thiscall* AdjustGlyphBox)(Font* _this, GlyphInfo* adjusted, GlyphInfo* unadjusted, int w, int h);
+		int field_2C;
+		bool(__thiscall* BlitGlyph)(Font* _this, int textColor, GlyphInfo* adjusted, GlyphInfo* unadjusted);
+	};
+
+	struct Font
+	{
+		Font_vtable* vft;
+		HDC hdc;
+		int hFont;
+		int hPrevFont;
+		TEXTMETRICW metrics;
+		int field_4C;
+		int* unadjustedBuffer;
+		char isPrevFontSet;
+		char field_55;
+		__declspec(align(4)) char isVertical;
+		int* adjustedBuffer;
+		int x;
+		int y;
+		int w;
+		int h;
+	};
+
 	struct SGame
 	{
 		__int16 rubyCursorX;
@@ -186,7 +246,7 @@ namespace omega {
 		int field_2230;
 		int textColor;
 		int field_2238;
-		char field_223C;
+		char spinnerAnimationIndex;
 		int field_2240;
 		char field_2244;
 		char field_2245;
@@ -293,7 +353,7 @@ namespace omega {
 		int field_3192C[352];
 		char currentScriptName_[128];
 		int field_31F2C[16673];
-		char field_423B0;
+		char textMode;
 		char field_423B1;
 		int field_423B4;
 	};
@@ -403,6 +463,10 @@ namespace omega {
 		int field_264;
 	};
 
+#pragma endregion
+
+#pragma region Imports
+
 	struct fields_t
 	{
 		ScriptState*& GlobalScriptState;
@@ -424,6 +488,9 @@ namespace omega {
 		int& dword_793BB504;
 		int& dword_793BB508;
 		char& byte_793BB4A3;
+
+		Layer*& RenderTargetLayer;
+		size_t& SpinnerAnimationTime;
 	} *fields;
 
 	// imported functions
@@ -431,41 +498,84 @@ namespace omega {
 	void(*operator_delete_array)(void*);
 	void* (*operator_new_array)(unsigned);
 	bool(__stdcall* DestroySomeLayers)(SGame* game);
+	int(__cdecl* DrawLayerXYWHAlpha)(Layer* dst, Layer* src, int dstX, int dstY, int dstW, int dstH, int srcX, int srcY, int srcW, int srcH, int alpha);
 
-	/* doesn't work because address of the struct instance is not known at compile time
-	template<typename TReturn, typename... TArgs>
-	struct hook
-	{
-		template<registers... Registers>
-		struct usercall
-		{
-			TReturn(*RealFunctionPointer)(TArgs...);
-			TReturn(*HookFunctionPointer)(TArgs...);
+#pragma endregion
 
-			TReturn(*RealFunctionWrapper)(TArgs...) = usercall_adapter<&RealFunctionPointer, Registers...>::from_cdecl;
-			TReturn(*HookFunctionWrapper)(TArgs...) = usercall_adapter<&HookFunctionPointer, Registers...>::to_cdecl;
-		};
-	};
-	//*/
+#pragma region AppendTextA
 
 	typedef POINT* (*TAppendTextA)(const char* text, POINT* pCursor, Layer* layer, int color, int x, int y);
 
 	TAppendTextA AppendTextA;
 	TAppendTextA AppendTextAWrapper = usercall_adapter_indirect<&AppendTextA, registers::ecx, registers::edx>::from_cdecl;
 
+	static POINT lastCursorPos{};
+
 	static POINT* AppendTextAHook(const char* text, POINT* pCursor, Layer* layer, int color, int x, int y)
 	{
 		if(fields->GlobalSGame) fields->GlobalSGame->charsInLine = 0;
 		if(fields->GlobalSHistory) fields->GlobalSHistory->charsInLine = 0;
-		
-		AppendTextAWrapper(text, pCursor, layer, color, x, y - 6);
 
-		pCursor->y += 6;
+		if(fields->GlobalSGame != nullptr && layer == fields->GlobalSGame->nameLayer)
+		{
+			color = 0x005b85;
+		}
+
+		const auto extendedLayerData = reinterpret_cast<ExtendedLayerData*>(layer + 1);
+		extendedLayerData->font->isVertical = false;
+
+		if(fields->GlobalScriptState->textMode == 1)
+		{
+			const int lineIndex = (1200 - x) / 42;
+			const int realX = 50 + y - 48;
+			const int realY = 50 + lineIndex * 32;
+
+			AppendTextAWrapper(text, pCursor, layer, color, realX, realY);
+			lastCursorPos = *pCursor;
+
+			const int advance = pCursor->x - realX;
+			pCursor->x = x;
+			pCursor->y = y + advance;
+		}
+		else
+		{
+			AppendTextAWrapper(text, pCursor, layer, color, x, y);
+		}
 
 		return pCursor;
 	}
 
 	static constexpr auto* AppendTextAHookWrapper = usercall_adapter<AppendTextAHook, registers::ecx, registers::edx>::to_cdecl;
+
+#pragma endregion
+
+#pragma region DrawSpinner
+
+	typedef bool (*TDrawSpinner)(SGame* game);
+
+	TDrawSpinner DrawSpinner;
+	TDrawSpinner DrawSpinnerWrapper = usercall_adapter_indirect<&DrawSpinner, registers::esi>::from_cdecl;
+
+	static bool __cdecl DrawSpinnerHook(SGame* game)
+	{
+		if(timeGetTime() - fields->SpinnerAnimationTime > 50)
+		{
+			if(++game->spinnerAnimationIndex >= 29)
+				game->spinnerAnimationIndex = 0;
+			fields->SpinnerAnimationTime = timeGetTime();
+		}
+		DrawLayerXYWHAlpha(fields->RenderTargetLayer, game->clickWaitLayer,
+			lastCursorPos.x, lastCursorPos.y, 32, 32,		// dst
+			32 * game->spinnerAnimationIndex, 0, 32, 32,	// src
+			255);
+		return true;
+	}
+
+	static constexpr auto* DrawSpinnerHookWrapper = usercall_adapter<DrawSpinnerHook, registers::esi>::to_cdecl;
+
+#pragma endregion
+
+#pragma region TextCommand
 
 	typedef char* (*TTextCommand)(SGame* game, Instruction* instruction);
 
@@ -549,7 +659,7 @@ namespace omega {
 			// clear current line info and add new history entry
 
 			state->historyCount++;
-			if(state->field_423B0 == 1)
+			if(state->textMode == 1)
 				game->field_628++;
 			fields->GlobalConfig.field_A60[game->field_21F4] = 1;
 
@@ -584,12 +694,48 @@ namespace omega {
 	}
 
 	static constexpr auto* TextCommandHookWrapper = userpurge_adapter<TextCommandHook, registers::eax>::to_cdecl;
+
+#pragma endregion
+
+#pragma region DrawLayerXY
+
+	int(__cdecl* DrawLayerXY)(Layer* dst, Layer* src, int x, int y);
+
+	static int __cdecl DrawLayerXYHook(Layer* dst, Layer* src, int x, int y)
+	{
+		const auto game = fields->GlobalSGame;
+		if(game != nullptr)
+		{
+			if(src == game->textLayer && x == 340 && y == 572)
+			{
+				x += 25;
+				y -= 10;
+			}
+			if(src == game->nameLayer && x == 250 && y == 566)
+			{
+				x -= 25;
+				y -= 10;
+			}
+		}
+
+		return DrawLayerXY(dst, src, x, y);
+	}
+
+#pragma endregion
 }
 
 template<typename FuncPtrType>
 static void set_function_ptr(FuncPtrType& ref, void* address)
 {
 	ref = reinterpret_cast<FuncPtrType>(address);
+}
+
+template<typename FuncPtrType>
+static void set_function_ptr(FuncPtrType& ref, const char* moduleName, const char* procName)
+{
+	auto* moduleHandle = GetModuleHandleA(moduleName);
+	auto* procAddress = GetProcAddress(moduleHandle, procName);
+	ref = reinterpret_cast<FuncPtrType>(procAddress);
 }
 
 template<typename FieldType>
@@ -600,10 +746,8 @@ static FieldType& get_field_at(void* address)
 
 void uif::features::flowers_engine_fixes::initialize()
 {
-	enabled = config().value("/flowers_engine_fixes/enable"_json_pointer, false);
-	if(!enabled) return;
-
 	char* imageBase = reinterpret_cast<char*>(GetModuleHandleA("Script.dll"));
+	char* himorogiBase = reinterpret_cast<char*>(GetModuleHandleA("Himorogi.dll"));
 	std::cout << *this << " Script image base: " << blue(reinterpret_cast<void*>(imageBase)) << "\n";
 
 	omega::fields = new omega::fields_t{
@@ -625,29 +769,32 @@ void uif::features::flowers_engine_fixes::initialize()
 		get_field_at<int>(imageBase + 0x00B2B500),
 		get_field_at<int>(imageBase + 0x00B2B504),
 		get_field_at<int>(imageBase + 0x00B2B508),
-		get_field_at<char>(imageBase + 0x00B2B4A3)
+		get_field_at<char>(imageBase + 0x00B2B4A3),
+		
+		get_field_at<omega::Layer*>(imageBase + 0x00B2B4A4),
+		get_field_at<size_t>(imageBase + 0x00B2B508)
 	};
-
-	set_function_ptr(omega::AppendTextA, imageBase + 0x000088F0);
-	set_function_ptr(omega::TextCommand, imageBase + 0x0001EFD0);
-	//set_function_ptr(omega::ProcessText, imageBase + 0x00028B90);
 
 	set_function_ptr(omega::operator_delete_array, imageBase + 0x00051EF6);
 	set_function_ptr(omega::operator_new_array, imageBase + 0x000421A3);
 	set_function_ptr(omega::DestroySomeLayers, imageBase + 0x00023D20);
-	//set_function_ptr(omega::sub_788B5600, imageBase + 0x00025600);
-	//set_function_ptr(omega::sub_788B8B40, imageBase + 0x00028B40);
-	//set_function_ptr(omega::sub_788AE4A0, imageBase + 0x0001E4A0);
-	//set_function_ptr(omega::ClearInputFlags, imageBase + 0x000118E0);
+	set_function_ptr(omega::DrawLayerXYWHAlpha, "Himorogi.dll", "DrawLayerXYWHAlpha");
+
+	set_function_ptr(omega::AppendTextA, imageBase + 0x000088F0); // 781E88F0 - 781E0000
+	set_function_ptr(omega::TextCommand, imageBase + 0x0001EFD0); // 781FEFD0 - 781E0000
+	set_function_ptr(omega::DrawSpinner, imageBase + 0x000252E0); // 782052E0 - 781E0000
+	set_function_ptr(omega::DrawLayerXY, himorogiBase + 0x00005BD0); // 78E25BD0 - 78E20000
 
 	hooks::hook_function(this, omega::AppendTextA, omega::AppendTextAHookWrapper, "AppendTextA");
+	hooks::hook_function(this, omega::DrawSpinner, omega::DrawSpinnerHookWrapper, "DrawSpinner");
 	hooks::hook_function(this, omega::TextCommand, omega::TextCommandHookWrapper, "TextCommand");
+	hooks::hook_function(this, omega::DrawLayerXY, omega::DrawLayerXYHook, "DrawLayerXY");
 }
 
 void uif::features::flowers_engine_fixes::finalize()
 {
-	if(!enabled) return;
-
 	hooks::unhook_function(this, omega::AppendTextA, omega::AppendTextAHookWrapper, "AppendTextA");
+	hooks::unhook_function(this, omega::DrawSpinner, omega::DrawSpinnerHookWrapper, "DrawSpinner");
 	hooks::unhook_function(this, omega::TextCommand, omega::TextCommandHookWrapper, "TextCommand");
+	hooks::unhook_function(this, omega::DrawLayerXY, omega::DrawLayerXYHook, "DrawLayerXY");
 }

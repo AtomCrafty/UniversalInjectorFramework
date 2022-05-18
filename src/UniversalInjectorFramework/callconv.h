@@ -143,11 +143,11 @@ namespace uif::calling_conventions
 		__asm {
 			mov eax, FuncPtr
 			call eax
+			add esp, TotalArgSize
 		}
 
 		if constexpr(StackArgCount > 0) {
 			__asm {
-				add esp, TotalArgSize
 				pop edi
 				pop esi
 			}

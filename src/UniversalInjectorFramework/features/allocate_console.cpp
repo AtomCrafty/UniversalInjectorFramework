@@ -11,6 +11,8 @@ using namespace uif::ansi;
 
 static void alloc_console()
 {
+	if(GetConsoleWindow()) return;
+
 	// try to reuse the existing console
 	if(!AttachConsole(ATTACH_PARENT_PROCESS))
 	{

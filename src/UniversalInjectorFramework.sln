@@ -17,6 +17,8 @@ Global
 		d3d8|x86 = d3d8|x86
 		d3d9|x64 = d3d9|x64
 		d3d9|x86 = d3d9|x86
+		d3dcompiler_43|x64 = d3dcompiler_43|x64
+		d3dcompiler_43|x86 = d3dcompiler_43|x86
 		d3dcompiler_47|x64 = d3dcompiler_47|x64
 		d3dcompiler_47|x86 = d3dcompiler_47|x86
 		dxgi|x64 = dxgi|x64
@@ -37,6 +39,10 @@ Global
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x64.Build.0 = d3d9|x64
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x86.ActiveCfg = d3d9|Win32
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d9|x86.Build.0 = d3d9|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_43|x64.ActiveCfg = d3dcompiler_43|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_43|x64.Build.0 = d3dcompiler_43|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_43|x86.ActiveCfg = d3dcompiler_43|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_43|x86.Build.0 = d3dcompiler_43|Win32
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x64.ActiveCfg = d3dcompiler_47|x64
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x64.Build.0 = d3dcompiler_47|x64
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3dcompiler_47|x86.ActiveCfg = d3d9|Win32
@@ -61,6 +67,10 @@ Global
 		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x64.Build.0 = Debug|x64
 		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x86.ActiveCfg = Debug|Win32
 		{962A7719-2381-40D0-8214-377689F9429A}.d3d9|x86.Build.0 = Debug|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_43|x64.ActiveCfg = Debug|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_43|x64.Build.0 = Debug|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_43|x86.ActiveCfg = Debug|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_43|x86.Build.0 = Debug|Win32
 		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x64.ActiveCfg = Debug|x64
 		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x64.Build.0 = Debug|x64
 		{962A7719-2381-40D0-8214-377689F9429A}.d3dcompiler_47|x86.ActiveCfg = Debug|Win32
@@ -85,6 +95,10 @@ Global
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3d9|x64.Build.0 = Debug|x64
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3d9|x86.ActiveCfg = Debug|Win32
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3d9|x86.Build.0 = Debug|Win32
+		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_43|x64.ActiveCfg = Debug|x64
+		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_43|x64.Build.0 = Debug|x64
+		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_43|x86.ActiveCfg = Debug|Win32
+		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_43|x86.Build.0 = Debug|Win32
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_47|x64.ActiveCfg = Debug|x64
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_47|x64.Build.0 = Debug|x64
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3dcompiler_47|x86.ActiveCfg = Debug|Win32

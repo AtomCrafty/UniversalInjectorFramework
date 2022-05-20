@@ -25,6 +25,14 @@
       <Configuration>d3d11</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="d3dcompiler_43|Win32">
+      <Configuration>d3dcompiler_43</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="d3dcompiler_43|x64">
+      <Configuration>d3dcompiler_43</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="dxgi|Win32">
       <Configuration>dxgi</Configuration>
       <Platform>Win32</Platform>
@@ -146,6 +154,14 @@
       <ModuleDefinitionFile>proxies\d3dcompiler_47.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='d3dcompiler_43'">
+    <ClCompile>
+      <PreprocessorDefinitions>UIF_LIB_D3DCOMPILER_43;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>proxies\d3dcompiler_43.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='opengl32'">
     <ClCompile>
       <PreprocessorDefinitions>UIF_LIB_OPENGL32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -167,6 +183,7 @@
     <ClInclude Include="proxies\d3d11.h" />
     <ClInclude Include="proxies\d3d8.h" />
     <ClInclude Include="proxies\d3d9.h" />
+    <ClInclude Include="proxies\d3dcompiler_43.h" />
     <ClInclude Include="proxies\d3dcompiler_47.h" />
     <ClInclude Include="proxies\dxgi.h" />
     <ClInclude Include="encoding.h" />
@@ -191,6 +208,7 @@
     <ClCompile Include="features\memory_patcher.cpp" />
     <ClCompile Include="proxies\d3d11.cpp" />
     <ClCompile Include="proxies\d3d8.cpp" />
+    <ClCompile Include="proxies\d3dcompiler_43.cpp" />
     <ClCompile Include="proxies\d3dcompiler_47.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="proxies\d3d9.cpp" />
@@ -219,6 +237,7 @@
     <None Include="proxies\d3d11.def" />
     <None Include="proxies\d3d8.def" />
     <None Include="proxies\d3d9.def" />
+    <None Include="proxies\d3dcompiler_43.def" />
     <None Include="proxies\d3dcompiler_47.def" />
     <None Include="proxies\dxgi.def" />
     <None Include="proxies\opengl32.def" />

@@ -101,6 +101,9 @@
     <ClInclude Include="features\memory_patcher.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
+    <ClInclude Include="proxies\d3dcompiler_43.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -172,6 +175,9 @@
     <ClCompile Include="features\memory_patcher.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
+    <ClCompile Include="proxies\d3dcompiler_43.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="proxies\d3dcompiler_47.def">
@@ -190,6 +196,9 @@
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\d3d8.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\d3dcompiler_43.def">
       <Filter>Source Files\proxies</Filter>
     </None>
   </ItemGroup>

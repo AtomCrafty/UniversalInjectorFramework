@@ -211,4 +211,12 @@
       <Filter>Source Files\proxies</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="dllmain64.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+    <MASM Include="dllmain32.asm">
+      <Filter>Source Files</Filter>
+    </MASM>
+  </ItemGroup>
 </Project>

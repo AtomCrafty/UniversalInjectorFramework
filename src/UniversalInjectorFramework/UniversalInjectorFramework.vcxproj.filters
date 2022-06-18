@@ -104,6 +104,9 @@
     <ClInclude Include="proxies\d3dcompiler_43.h">
       <Filter>Header Files\proxies</Filter>
     </ClInclude>
+    <ClInclude Include="proxies\winmm.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -178,6 +181,9 @@
     <ClCompile Include="proxies\d3dcompiler_43.cpp">
       <Filter>Source Files\proxies</Filter>
     </ClCompile>
+    <ClCompile Include="proxies\winmm.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="proxies\d3dcompiler_47.def">
@@ -199,6 +205,9 @@
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\d3dcompiler_43.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\winmm.def">
       <Filter>Source Files\proxies</Filter>
     </None>
   </ItemGroup>

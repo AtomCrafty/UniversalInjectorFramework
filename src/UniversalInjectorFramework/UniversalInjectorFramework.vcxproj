@@ -57,6 +57,14 @@
       <Configuration>opengl32</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="winmm|Win32">
+      <Configuration>winmm</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="winmm|x64">
+      <Configuration>winmm</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -170,7 +178,15 @@
       <ModuleDefinitionFile>proxies\opengl32.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
-  <!--  -->
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='winmm'">
+    <ClCompile>
+      <PreprocessorDefinitions>UIF_LIB_WINMM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>proxies\winmm.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- source files -->
   <ItemGroup>
     <ClInclude Include="ansi.h" />
     <ClInclude Include="callconv.h" />
@@ -197,6 +213,7 @@
     <ClInclude Include="features\play_timer.h" />
     <ClInclude Include="features\start_suspended.h" />
     <ClInclude Include="features\tunnel_decoder.h" />
+    <ClInclude Include="proxies\winmm.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="features\_feature_base.h" />
   </ItemGroup>
@@ -225,6 +242,7 @@
     <ClCompile Include="features\play_timer.cpp" />
     <ClCompile Include="features\start_suspended.cpp" />
     <ClCompile Include="features\tunnel_decoder.cpp" />
+    <ClCompile Include="proxies\winmm.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="features\_feature_base.cpp" />
   </ItemGroup>
@@ -241,6 +259,7 @@
     <None Include="proxies\d3dcompiler_47.def" />
     <None Include="proxies\dxgi.def" />
     <None Include="proxies\opengl32.def" />
+    <None Include="proxies\winmm.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

@@ -277,7 +277,7 @@ Next, open `libraries.cpp`, include the newly added header and add new `load_lib
 
 Now you need to create a build configuration for the new proxy. Open the Visual Studio Configuration Manager located in the "Build" menu, click on the dropdown in the top left and choose "New...". Enter the name of your dll file (without the extension) in the Name field and select one of the existing configurations to copy from.
 
-Finally, we need to add some custom settings to the project file. Right click the "UniversalInjectorFramework" project (not the solution itself!) in the Solition Explorer and choose "Unload project". This should open the XML project file in the editor.
+Finally, we need to add some custom settings to the project file. Right click the "UniversalInjectorFramework" project (not the solution itself!) in the Solution Explorer and choose "Unload project". This should open the XML project file in the editor.
 
 Find the section labeled `<!-- configurations -->` and add the following XML snippet:
 

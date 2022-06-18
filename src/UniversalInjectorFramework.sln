@@ -25,6 +25,8 @@ Global
 		dxgi|x86 = dxgi|x86
 		opengl32|x64 = opengl32|x64
 		opengl32|x86 = opengl32|x86
+		winmm|x64 = winmm|x64
+		winmm|x86 = winmm|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.d3d11|x64.ActiveCfg = d3d11|x64
@@ -55,6 +57,10 @@ Global
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x64.Build.0 = opengl32|x64
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x86.ActiveCfg = opengl32|Win32
 		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.opengl32|x86.Build.0 = opengl32|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.winmm|x64.ActiveCfg = winmm|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.winmm|x64.Build.0 = winmm|x64
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.winmm|x86.ActiveCfg = winmm|Win32
+		{CBBF2C50-0662-4442-AD10-881D8E95DDA3}.winmm|x86.Build.0 = winmm|Win32
 		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x64.ActiveCfg = Debug|x64
 		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x64.Build.0 = Debug|x64
 		{962A7719-2381-40D0-8214-377689F9429A}.d3d11|x86.ActiveCfg = Debug|Win32
@@ -83,6 +89,10 @@ Global
 		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x64.Build.0 = Debug|x64
 		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x86.ActiveCfg = Debug|Win32
 		{962A7719-2381-40D0-8214-377689F9429A}.opengl32|x86.Build.0 = Debug|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.winmm|x64.ActiveCfg = Debug|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.winmm|x64.Build.0 = Debug|x64
+		{962A7719-2381-40D0-8214-377689F9429A}.winmm|x86.ActiveCfg = Debug|Win32
+		{962A7719-2381-40D0-8214-377689F9429A}.winmm|x86.Build.0 = Debug|Win32
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3d11|x64.ActiveCfg = Debug|x64
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3d11|x64.Build.0 = Debug|x64
 		{024CF2E7-6985-4536-B063-55822E5F2696}.d3d11|x86.ActiveCfg = Debug|Win32
@@ -111,6 +121,10 @@ Global
 		{024CF2E7-6985-4536-B063-55822E5F2696}.opengl32|x64.Build.0 = Debug|x64
 		{024CF2E7-6985-4536-B063-55822E5F2696}.opengl32|x86.ActiveCfg = Debug|Win32
 		{024CF2E7-6985-4536-B063-55822E5F2696}.opengl32|x86.Build.0 = Debug|Win32
+		{024CF2E7-6985-4536-B063-55822E5F2696}.winmm|x64.ActiveCfg = Debug|x64
+		{024CF2E7-6985-4536-B063-55822E5F2696}.winmm|x64.Build.0 = Debug|x64
+		{024CF2E7-6985-4536-B063-55822E5F2696}.winmm|x86.ActiveCfg = Debug|Win32
+		{024CF2E7-6985-4536-B063-55822E5F2696}.winmm|x86.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

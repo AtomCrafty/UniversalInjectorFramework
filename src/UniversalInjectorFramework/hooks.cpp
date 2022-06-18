@@ -24,6 +24,7 @@ namespace uif::hooks
 
 	static std::unordered_map<void*, hooked_import_info> hooked_imports{};
 	static std::unordered_map<void*, hooked_function_info> hooked_functions{};
+	static std::unordered_map<void*, void*> trampoline_mapping{};
 
 	struct hook_import_info
 	{
@@ -146,29 +147,47 @@ namespace uif::hooks
 		else
 			std::cout << *feature << " Hooking " << yellow(functionName) << " at " << blue(targetFunction) << green(" --> ") << blue(hookFunction) << '\n';
 
+
+		void* originalTargetFunction = targetFunction;
 		DetourTransactionBegin();
 		DetourAttach(&targetFunction, hookFunction);
 		DetourTransactionCommit();
+		trampoline_mapping.try_emplace(targetFunction, originalTargetFunction);
+
 		return true;
 	}
 
 	bool unhook_function(const features::feature_base* feature, void*& targetFunction, void* hookFunction, const std::string& functionName)
 	{
-		const auto iterator = hooked_functions.find(targetFunction);
+		const auto trampolineIterator = trampoline_mapping.find(targetFunction);
+		bool failed = false;
 
-		if(iterator == hooked_functions.end() || iterator->second.feature != feature)
+		if(trampolineIterator == trampoline_mapping.end())
+		{
+			failed = true;
+			if (functionName.empty())
+				std::cout << *feature << dark_yellow(" Warning:") << " Unable to unhook function at " << blue(targetFunction) << " because no trampoline exists at this location\n";
+			else
+				std::cout << *feature << dark_yellow(" Warning:") << " Unable to unhook " << yellow(functionName) << " at " << blue(targetFunction) << " because no trampoline exists at this location\n";
+			return false;
+		}
+		
+		const auto originalTargetFunction = trampolineIterator->second;
+		const auto functionIterator = hooked_functions.find(originalTargetFunction);
+
+		if(functionIterator == hooked_functions.end() || functionIterator->second.feature != feature)
 		{
 			if(functionName.empty())
-				std::cout << *feature << dark_yellow(" Warning:") << " Unable to unhook function at " << blue(targetFunction) << " because it has not been hooked by this feature\n";
+				std::cout << *feature << dark_yellow(" Warning:") << " Unable to unhook function at " << blue(originalTargetFunction) << " because it has not been hooked by this feature\n";
 			else
-				std::cout << *feature << dark_yellow(" Warning:") << " Unable to unhook " << yellow(functionName) << " at " << blue(targetFunction) << " because it has not been hooked by this feature \n";
+				std::cout << *feature << dark_yellow(" Warning:") << " Unable to unhook " << yellow(functionName) << " at " << blue(originalTargetFunction) << " because it has not been hooked by this feature\n";
 			return false;
 		}
 
 		if(functionName.empty())
-			std::cout << *feature << " Unhooking function at " << blue(targetFunction) << red(" -/-> ") << blue(hookFunction) << '\n';
+			std::cout << *feature << " Unhooking function at " << blue(originalTargetFunction) << red(" -/-> ") << blue(hookFunction) << '\n';
 		else
-			std::cout << *feature << " Unhooking " << yellow(functionName) << " at " << blue(targetFunction) << red(" -/-> ") << blue(hookFunction) << '\n';
+			std::cout << *feature << " Unhooking " << yellow(functionName) << " at " << blue(originalTargetFunction) << red(" -/-> ") << blue(hookFunction) << '\n';
 
 		DetourTransactionBegin();
 		DetourDetach(&targetFunction, hookFunction);

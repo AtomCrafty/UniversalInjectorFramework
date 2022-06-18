@@ -7,11 +7,10 @@
 #include "features/_feature_base.h"
 
 using namespace uif::ansi;
+using namespace uif::utils;
 
 namespace uif::hooks
 {
-	using namespace utils;
-
 	struct hooked_import_info
 	{
 		const features::feature_base* feature;
@@ -35,16 +34,6 @@ namespace uif::hooks
 		bool success;
 		bool found;
 	};
-
-	static std::string get_module_name(HMODULE hModule)
-	{
-		char dllNameBuffer[MAX_PATH];
-		GetModuleFileNameA(hModule, dllNameBuffer, MAX_PATH);
-		const char* dllName = strrchr(dllNameBuffer, '\\');
-		if(dllName == nullptr) dllName = dllNameBuffer;
-		else dllName++;
-		return dllName;
-	}
 
 	BOOL CALLBACK hook_import_enum_proc(PVOID pContext, DWORD nOrdinal, LPCSTR pszFunc, PVOID* ppvFunc)
 	{

@@ -3,6 +3,7 @@
 
 #include "ansi.h"
 #include "libraries.h"
+#include "utils.h"
 
 #include "features/allocate_console.h"
 #include "features/start_suspended.h"
@@ -45,11 +46,19 @@ namespace uif
 		}
 
 		initialize_feature<features::allocate_console>();
-
-		char exePath[MAX_PATH];
-		GetModuleFileNameA(game_module, exePath, MAX_PATH);
+		
 		std::cout << white("[injector] ======================================================\n");
-		std::cout << white("[injector]") << " Injecting into module " << yellow(exePath) << " at address " << blue(game_module) << '\n';
+		std::cout << white("[injector]") << " Injecting into module " << yellow(utils::get_module_name(game_module)) << " at address " << blue(game_module) << '\n';
+
+		if(config().value("/injector/print_loaded_modules"_json_pointer, false))
+		{
+			std::cout << white("[injector]") << " Loaded modules:\n";
+			HMODULE hModule = nullptr;
+			while((hModule = DetourEnumerateModules(hModule)))
+			{
+				std::cout << white("[injector] ") << blue(hModule) << ' ' << yellow(utils::get_module_name(hModule)) << '\n';
+			}
+		}
 
 		if(config().contains("/injector/load_modules"_json_pointer))
 		{
@@ -63,11 +72,11 @@ namespace uif
 
 					std::string dllPath;
 					dllPathValue.get_to(dllPath);
-
+					
 					auto handle = LoadLibraryA(dllPath.c_str());
 
 					if(!handle) {
-						std::cout << white("[injector]") << dark_red(" Error:") << " Unable to locate dll " << yellow(dllPath) << '\n';
+						std::cout << white("[injector]") << dark_red(" Error:") << " Unable to locate dll " << yellow(dllPath) << " (" << GetLastError() << " - " << utils::get_last_error_message() << ")\n";
 						continue;
 					}
 
@@ -94,7 +103,7 @@ namespace uif
 					auto handle = GetModuleHandleA(moduleName.c_str());
 
 					if(!handle) {
-						std::cout << white("[injector]") << dark_red(" Error:") << " Unable to locate additional module " << yellow(moduleName) << '\n';
+						std::cout << white("[injector]") << dark_red(" Error:") << " Unable to locate additional module " << yellow(moduleName) << " (" << GetLastError() << " - " << utils::get_last_error_message() << ")\n";
 						continue;
 					}
 

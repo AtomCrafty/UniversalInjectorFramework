@@ -105,6 +105,36 @@ namespace uif::utils
 		return { path };
 	}
 
+	std::string get_module_name(HMODULE hModule)
+	{
+		char dllNameBuffer[MAX_PATH];
+		if(GetModuleFileNameA(hModule, dllNameBuffer, MAX_PATH) == 0)
+			return "<unknown>";
+		const char* dllName = strrchr(dllNameBuffer, '\\');
+		if (dllName == nullptr) dllName = dllNameBuffer;
+		else dllName++;
+		return dllName;
+	}
+
+	// https://stackoverflow.com/a/17387176/7391324
+	std::string get_last_error_message(DWORD error)
+	{
+		if (error == 0) error = GetLastError();
+		if (error == 0) return "No error";
+
+		LPSTR messageBuffer = nullptr;
+		
+		const size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			nullptr, error, MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), reinterpret_cast<LPSTR>(&messageBuffer), 0, nullptr);
+		
+		std::string message(messageBuffer, size);
+		message.erase(std::find_if(message.rbegin(), message.rend(), [](unsigned char ch) { return !std::isspace(ch) && ch != '.'; }).base(), message.end());
+		
+		LocalFree(messageBuffer);
+
+		return message;
+	}
+
 	WORD set_console_color(const WORD color)
 	{
 		CONSOLE_SCREEN_BUFFER_INFO info;

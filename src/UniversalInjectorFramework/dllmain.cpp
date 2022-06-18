@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 
 #include "injector.h"
+#include "utils.h"
 
 extern "C" {
     void* ExeEntryPoint;
@@ -11,8 +12,17 @@ extern "C" {
 
 void InstallDelayedAttachHook()
 {
-    uif::injector::instance().attach();
-    ExeEntryPoint = DetourGetEntryPoint(nullptr);
+    const auto targetModuleName = uif::injector::instance().config().value("/injector/target_module"_json_pointer, "");
+    if (targetModuleName.empty())
+    {
+        ExeEntryPoint = DetourGetEntryPoint(nullptr);
+    }
+    else
+    {
+        const auto handle = GetModuleHandleA(targetModuleName.c_str());
+        if (!handle) uif::utils::fail("Target module is not loaded");
+        ExeEntryPoint = DetourGetEntryPoint(handle);
+    }
     DetourTransactionBegin();
     DetourAttach(&ExeEntryPoint, ExeEntryPointHook);
     DetourTransactionCommit();

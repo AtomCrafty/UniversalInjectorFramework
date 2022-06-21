@@ -28,7 +28,7 @@ namespace uif::calling_conventions
 		template<registers Reg1, registers Reg2, registers Reg3, registers Reg4, registers Reg5, registers Reg6, typename TReturn, typename... TArgs>
 		static TReturn __cdecl from_cdecl_impl(TArgs...);
 
-		static constexpr size_t TotalArgCount = function_traits<std::remove_pointer_t<decltype(FuncPtrPtr)>>::arg_count;
+		static constexpr size_t TotalArgCount = function_traits<std::remove_pointer_t<std::remove_reference_t<decltype(FuncPtrPtr)>>>::arg_count;
 		static constexpr size_t TotalArgSize = TotalArgCount * 4;
 		static constexpr size_t RegArgCount = std::min(TotalArgCount, sizeof...(Registers));
 		static constexpr size_t StackArgCount = TotalArgCount - RegArgCount;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace encoding
 {
 	std::wstring shiftjis_to_utf16(const std::string& shift_jis);

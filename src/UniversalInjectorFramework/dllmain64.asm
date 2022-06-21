@@ -1,11 +1,11 @@
 .CODE
 ALIGN 16
 EXTERN Attach : PROC
-EXTERN ExeEntryPoint : QWORD
+EXTERN EntryPoint : QWORD
 
-ExeEntryPointHook PROC
+EntryPointHook PROC
 	call Attach
-	jmp ExeEntryPoint
-ExeEntryPointHook ENDP
+	jmp EntryPoint
+EntryPointHook ENDP
 
 END

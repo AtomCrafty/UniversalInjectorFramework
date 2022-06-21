@@ -4,11 +4,11 @@
 .CODE
 ALIGN 8
 EXTERN Attach : PROC
-EXTERN ExeEntryPoint : DWORD
+EXTERN EntryPoint : DWORD
 
-ExeEntryPointHook PROC
+EntryPointHook PROC
 	call Attach
-	jmp ExeEntryPoint
-ExeEntryPointHook ENDP
+	jmp EntryPoint
+EntryPointHook ENDP
 
 END

@@ -27,10 +27,13 @@ void InstallDelayedAttachHook()
 	if (targetModuleName.empty())
 	{
 		EntryPoint = DetourGetEntryPoint(nullptr);
+		uif::utils::debug_log("InstallDelayedAttachHook: no target module specified");
 	}
 	else
 	{
 		const auto handle = GetModuleHandleA(targetModuleName.c_str());
+		uif::utils::debug_log("InstallDelayedAttachHook: target module is ", false);
+		uif::utils::debug_log(targetModuleName.c_str());
 		if (!handle) uif::utils::fail("Target module is not loaded");
 		EntryPoint = DetourGetEntryPoint(handle);
 	}

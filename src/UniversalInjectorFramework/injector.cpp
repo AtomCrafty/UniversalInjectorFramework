@@ -8,6 +8,7 @@
 #include "features/allocate_console.h"
 #include "features/start_suspended.h"
 #include "features/character_substitution.h"
+#include "features/custom_feature.h"
 #include "features/tunnel_decoder.h"
 #include "features/file_monitor.h"
 #include "features/font_manager.h"
@@ -123,6 +124,7 @@ namespace uif
 		initialize_feature<features::window_manager>();
 		initialize_feature<features::memory_patcher>();
 		initialize_feature<features::play_timer>();
+		initialize_feature<features::custom_feature>();
 
 		std::cout << white("[injector]") << green(" Initialization complete\n");
 		std::cout << white("[injector] ======================================================\n");

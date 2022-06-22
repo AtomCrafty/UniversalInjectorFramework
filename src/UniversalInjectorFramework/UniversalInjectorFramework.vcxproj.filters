@@ -110,6 +110,9 @@
     <ClInclude Include="features\window_manager.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
+    <ClInclude Include="features\custom_feature.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -188,6 +191,9 @@
       <Filter>Source Files\proxies</Filter>
     </ClCompile>
     <ClCompile Include="features\window_manager.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\custom_feature.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
   </ItemGroup>

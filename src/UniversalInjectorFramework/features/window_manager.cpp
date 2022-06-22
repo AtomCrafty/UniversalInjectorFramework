@@ -20,7 +20,7 @@ static LRESULT WINAPI DefWindowProcWHook(HWND hWnd, UINT Msg, WPARAM wParam, LPA
 	{
 		CREATESTRUCTW paramsW{};
 		memcpy(&paramsW, reinterpret_cast<CREATESTRUCTW*>(lParam), sizeof(CREATESTRUCTW));
-		
+
 		const auto& windowMgr = uif::injector::instance().feature<uif::features::window_manager>();
 		std::wstring windowTitle = paramsW.lpszName;
 		windowMgr.process_title(windowTitle);
@@ -76,12 +76,39 @@ static LRESULT WINAPI DefWindowProcAHook(HWND hWnd, UINT Msg, WPARAM wParam, LPA
 
 #pragma endregion
 
+static BOOL CALLBACK EnumWindowsProc(HWND hWnd, LPARAM lParam)
+{
+	auto* windows = reinterpret_cast<std::vector<HWND>*>(lParam);
+
+	DWORD windowProcessId = 0;
+	GetWindowThreadProcessId(hWnd, &windowProcessId);
+	if (windowProcessId == GetCurrentProcessId())
+		windows->push_back(hWnd);
+
+	return TRUE;
+}
+
 void uif::features::window_manager::initialize()
 {
 	if (config().contains("overwrite_title"))
 	{
 		overwrite_title = true;
-		config()["overwrite_title"].get_to(overwrite_title_value);
+		overwrite_title_value = encoding::utf8_to_utf16(config().value("overwrite_title", ""));
+	}
+
+	if (config().value("process_existing_windows", false))
+	{
+		std::vector<HWND> windows{};
+		EnumWindows(EnumWindowsProc, reinterpret_cast<LPARAM>(&windows));
+
+		for (const auto window : windows)
+		{
+			std::string title;
+			title.resize(1024);
+			title.resize(GetWindowTextA(window, title.data(), static_cast<int>(title.length())));
+			std::wstring processed = process_title(title);
+			DefWindowProcW(window, WM_SETTEXT, 0, reinterpret_cast<LPARAM>(processed.c_str()));
+		}
 	}
 
 	hooks::hook_import(this, "DefWindowProcA", DefWindowProcAHook);

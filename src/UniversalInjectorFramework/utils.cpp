@@ -141,22 +141,22 @@ namespace uif::utils
 
 	void normalize(std::wstring& text)
 	{
-		const auto& substitution = injector::instance().feature<features::character_substitution>();
+		const auto* substitution = injector::instance().try_get_feature<features::character_substitution>();
 
-		if (substitution.is_enabled())
+		if (substitution && substitution->is_enabled())
 		{
-			substitution.substitute(text);
+			substitution->substitute(text);
 		}
 	}
 	
 	std::wstring normalize(const std::string& text)
 	{
-		const auto& decoder = injector::instance().feature<features::tunnel_decoder>();
+		const auto* decoder = injector::instance().try_get_feature<features::tunnel_decoder>();
 
 		std::wstring wide;
-		if (decoder.is_enabled())
+		if (decoder && decoder->is_enabled())
 		{
-			wide = decoder.decode(text.c_str(), static_cast<int>(text.length()));
+			wide = decoder->decode(text.c_str(), static_cast<int>(text.length()));
 		}
 		else
 		{

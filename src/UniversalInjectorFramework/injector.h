@@ -13,6 +13,7 @@ namespace uif
 		void attach();
 		void detach();
 		template<typename T> T& feature() const;
+		template<typename T> T* try_get_feature() const;
 
 		HMODULE load_real_library(const std::string& dllName);
 
@@ -55,5 +56,19 @@ namespace uif
 		}
 
 		throw std::runtime_error(std::string("no matching feature found for type ") + typeid(T).name());
+	}
+
+	template <typename T>
+	T* injector::try_get_feature() const
+	{
+		for (auto* feature : features)
+		{
+			T* casted = dynamic_cast<T*>(feature);
+			if (casted != nullptr)
+			{
+				return casted;
+			}
+		}
+		return nullptr;
 	}
 }

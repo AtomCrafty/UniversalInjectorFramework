@@ -107,6 +107,9 @@
     <ClInclude Include="proxies\winmm.h">
       <Filter>Header Files\proxies</Filter>
     </ClInclude>
+    <ClInclude Include="features\window_manager.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -183,6 +186,9 @@
     </ClCompile>
     <ClCompile Include="proxies\winmm.cpp">
       <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="features\window_manager.cpp">
+      <Filter>Source Files\features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

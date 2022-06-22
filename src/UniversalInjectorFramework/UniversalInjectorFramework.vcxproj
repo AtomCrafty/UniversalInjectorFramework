@@ -196,6 +196,7 @@
     <ClInclude Include="features\character_substitution.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="features\file_monitor.h" />
+    <ClInclude Include="features\window_manager.h" />
     <ClInclude Include="function_traits.h" />
     <ClInclude Include="features\memory_patcher.h" />
     <ClInclude Include="proxies\d3d11.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="config.cpp" />
     <ClCompile Include="features\file_monitor.cpp" />
     <ClCompile Include="features\memory_patcher.cpp" />
+    <ClCompile Include="features\window_manager.cpp" />
     <ClCompile Include="proxies\d3d11.cpp" />
     <ClCompile Include="proxies\d3d8.cpp" />
     <ClCompile Include="proxies\d3dcompiler_43.cpp" />

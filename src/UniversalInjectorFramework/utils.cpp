@@ -5,6 +5,10 @@
 #include <fcntl.h>
 
 #include "ansi.h"
+#include "encoding.h"
+#include "injector.h"
+#include "features/character_substitution.h"
+#include "features/tunnel_decoder.h"
 
 using namespace uif::ansi;
 
@@ -133,6 +137,34 @@ namespace uif::utils
 		LocalFree(messageBuffer);
 
 		return message;
+	}
+
+	void normalize(std::wstring& text)
+	{
+		const auto& substitution = injector::instance().feature<features::character_substitution>();
+
+		if (substitution.is_enabled())
+		{
+			substitution.substitute(text);
+		}
+	}
+	
+	std::wstring normalize(const std::string& text)
+	{
+		const auto& decoder = injector::instance().feature<features::tunnel_decoder>();
+
+		std::wstring wide;
+		if (decoder.is_enabled())
+		{
+			wide = decoder.decode(text.c_str(), static_cast<int>(text.length()));
+		}
+		else
+		{
+			wide = encoding::shiftjis_to_utf16(text);
+		}
+
+		normalize(wide);
+		return wide;
 	}
 
 	WORD set_console_color(const WORD color)

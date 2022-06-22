@@ -59,7 +59,7 @@ static int CALLBACK enum_fonts_proc_w(const LOGFONTW* lplf, const TEXTMETRICW* l
 	return info->fontEnumProcW(&lf, lptm, FontType, info->originalLParam);
 }
 
-int __stdcall EnumFontFamiliesExAHook(HDC hdc, LPLOGFONTA lpLogfont, FONTENUMPROCA lpProc, LPARAM lParam, DWORD dwFlags)
+int WINAPI EnumFontFamiliesExAHook(HDC hdc, LPLOGFONTA lpLogfont, FONTENUMPROCA lpProc, LPARAM lParam, DWORD dwFlags)
 {
 	const auto& fontManager = uif::injector::instance().feature<uif::features::font_manager>();
 
@@ -79,7 +79,7 @@ int __stdcall EnumFontFamiliesExAHook(HDC hdc, LPLOGFONTA lpLogfont, FONTENUMPRO
 	return result;
 }
 
-int __stdcall EnumFontFamiliesExWHook(HDC hdc, LPLOGFONTW lpLogfont, FONTENUMPROCW lpProc, LPARAM lParam, DWORD dwFlags)
+int WINAPI EnumFontFamiliesExWHook(HDC hdc, LPLOGFONTW lpLogfont, FONTENUMPROCW lpProc, LPARAM lParam, DWORD dwFlags)
 {
 	const auto& fontManager = uif::injector::instance().feature<uif::features::font_manager>();
 
@@ -103,7 +103,7 @@ int __stdcall EnumFontFamiliesExWHook(HDC hdc, LPLOGFONTW lpLogfont, FONTENUMPRO
 
 #pragma region CreateFont
 
-HFONT __stdcall CreateFontAHook(
+HFONT WINAPI CreateFontAHook(
 	int    cHeight,
 	int    cWidth,
 	int    cEscapement,
@@ -132,7 +132,7 @@ HFONT __stdcall CreateFontAHook(
 		iCharSet, iOutPrecision, iClipPrecision, iQuality, iPitchAndFamily, pszFaceName);
 }
 
-HFONT __stdcall CreateFontWHook(
+HFONT WINAPI CreateFontWHook(
 	int    cHeight,
 	int    cWidth,
 	int    cEscapement,
@@ -165,7 +165,7 @@ HFONT __stdcall CreateFontWHook(
 
 #pragma region CreateFontIndirect
 
-HFONT __stdcall CreateFontIndirectAHook(const LOGFONTA* lplf)
+HFONT WINAPI CreateFontIndirectAHook(const LOGFONTA* lplf)
 {
 	const auto& fontManager = uif::injector::instance().feature<uif::features::font_manager>();
 
@@ -180,7 +180,7 @@ HFONT __stdcall CreateFontIndirectAHook(const LOGFONTA* lplf)
 	return CreateFontIndirectA(&logFont);
 }
 
-HFONT __stdcall CreateFontIndirectWHook(const LOGFONTW* lplf)
+HFONT WINAPI CreateFontIndirectWHook(const LOGFONTW* lplf)
 {
 	const auto& fontManager = uif::injector::instance().feature<uif::features::font_manager>();
 
@@ -199,7 +199,7 @@ HFONT __stdcall CreateFontIndirectWHook(const LOGFONTW* lplf)
 
 #pragma region CreateFontIndirectEx
 
-HFONT __stdcall CreateFontIndirectExAHook(const ENUMLOGFONTEXDVA* lplf)
+HFONT WINAPI CreateFontIndirectExAHook(const ENUMLOGFONTEXDVA* lplf)
 {
 	const auto& fontManager = uif::injector::instance().feature<uif::features::font_manager>();
 
@@ -214,7 +214,7 @@ HFONT __stdcall CreateFontIndirectExAHook(const ENUMLOGFONTEXDVA* lplf)
 	return CreateFontIndirectExA(&logFont);
 }
 
-HFONT __stdcall CreateFontIndirectExWHook(const ENUMLOGFONTEXDVW* lplf)
+HFONT WINAPI CreateFontIndirectExWHook(const ENUMLOGFONTEXDVW* lplf)
 {
 	const auto& fontManager = uif::injector::instance().feature<uif::features::font_manager>();
 

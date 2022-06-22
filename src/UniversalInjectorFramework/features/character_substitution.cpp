@@ -1,27 +1,18 @@
 #include "pch.h"
 #include "character_substitution.h"
 
-#include <codecvt>
-
 #include "config.h"
 #include "encoding.h"
 #include "hooks.h"
 #include "injector.h"
 
+#pragma region Hooks
+
 static BOOL __stdcall TextOutWHook(HDC hdc, int x, int y, LPCWSTR lpString, int c) {
 	const auto& subst = uif::injector::instance().feature<uif::features::character_substitution>();
-	const auto& map = subst.substitutions;
-
+	
 	std::wstring s = lpString;
-
-	for(wchar_t& ch : s)
-	{
-		const auto it = map.find(ch);
-		if(it != map.end())
-		{
-			ch = it->second;
-		}
-	}
+	subst.substitute(s);
 
 	return TextOutW(hdc, x, y, s.c_str(), static_cast<int>(s.length()));
 }
@@ -64,6 +55,8 @@ static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, 
 	return GetGlyphOutlineWHook(hdc, s[0], fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
 }
 
+#pragma endregion
+
 void uif::features::character_substitution::initialize()
 {
 	substitutions = std::map<wchar_t, wchar_t>();
@@ -94,4 +87,26 @@ void uif::features::character_substitution::finalize()
 	hooks::unhook_import(this, "TextOutW", TextOutWHook);
 	hooks::unhook_import(this, "GetGlyphOutlineA", GetGlyphOutlineAHook);
 	hooks::unhook_import(this, "GetGlyphOutlineW", GetGlyphOutlineWHook);
+}
+
+void uif::features::character_substitution::substitute(wchar_t* text, int length) const
+{
+	if (!is_enabled()) return;
+
+	for (int i = 0; i < length; ++i)
+	{
+		const wchar_t ch = text[i];
+		if (ch == 0) break;
+
+		const auto it = substitutions.find(ch);
+		if (it != substitutions.end())
+		{
+			text[i] = it->second;
+		}
+	}
+}
+
+void uif::features::character_substitution::substitute(std::wstring& text) const
+{
+	substitute(text.data(), static_cast<int>(text.length()));
 }

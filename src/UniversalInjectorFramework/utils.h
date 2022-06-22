@@ -16,6 +16,8 @@ namespace uif::utils {
 	std::filesystem::path get_dll_path();
 	std::string get_module_name(HMODULE hModule);
 	std::string get_last_error_message(DWORD error = 0);
+	void normalize(std::wstring& text);
+	std::wstring normalize(const std::string& text);
 	WORD set_console_color(WORD color);
 	void print_colored(const char* text, WORD color);
 	void patch_memory(void* address, const void* data, size_t size, void* oldDataBuffer);

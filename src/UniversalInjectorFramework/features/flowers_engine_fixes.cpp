@@ -463,6 +463,29 @@ namespace omega {
 		int field_264;
 	};
 
+	struct PluginSound
+	{
+		int field_0;
+		void(__cdecl* field_4)(PluginSound*, int);
+		void(__cdecl* field_8)(PluginSound*);
+		int field_C;
+		int field_10;
+		int field_14;
+		int field_18;
+		void(__cdecl* SetVolume)(PluginSound*, int);
+	};
+	
+	struct Sound
+	{
+		int field_0;
+		int field_4;
+		int field_8;
+		int field_C;
+		int volume;
+		int field_14;
+		PluginSound* pluginHandle;
+	};
+
 #pragma endregion
 
 #pragma region Imports
@@ -489,6 +512,7 @@ namespace omega {
 		int& dword_793BB508;
 		char& byte_793BB4A3;
 
+		Sound*& CurrentVoiceInfo;
 		Layer*& RenderTargetLayer;
 		size_t& SpinnerAnimationTime;
 	} *fields;
@@ -497,6 +521,7 @@ namespace omega {
 
 	void(*operator_delete_array)(void*);
 	void* (*operator_new_array)(unsigned);
+	bool(__cdecl* DestroySound)(PluginSound* sound);
 	bool(__stdcall* DestroySomeLayers)(SGame* game);
 	int(__cdecl* DrawLayerXYWHAlpha)(Layer* dst, Layer* src, int dstX, int dstY, int dstW, int dstH, int srcX, int srcY, int srcW, int srcH, int alpha);
 
@@ -673,8 +698,19 @@ namespace omega {
 
 			if(config.cancelVoiceOnClick == 1)
 			{
-				__debugbreak();
-				// TODO
+
+				if(fields->CurrentVoiceInfo)
+				{
+					if(auto* plugin = fields->CurrentVoiceInfo->pluginHandle)
+					{
+						plugin->field_8(plugin);
+						DestroySound(plugin);
+						fields->CurrentVoiceInfo->pluginHandle = nullptr;
+					}
+					
+					operator_delete_array(fields->CurrentVoiceInfo);
+					fields->CurrentVoiceInfo = nullptr;
+				}
 			}
 
 			memset(game->historyFile, 0, 0x80);
@@ -770,7 +806,8 @@ void uif::features::flowers_engine_fixes::initialize()
 		get_field_at<int>(imageBase + 0x00B2B504),
 		get_field_at<int>(imageBase + 0x00B2B508),
 		get_field_at<char>(imageBase + 0x00B2B4A3),
-		
+
+		get_field_at<omega::Sound*>(imageBase + 0x00B2B4E4),
 		get_field_at<omega::Layer*>(imageBase + 0x00B2B4A4),
 		get_field_at<size_t>(imageBase + 0x00B2B508)
 	};
@@ -779,6 +816,7 @@ void uif::features::flowers_engine_fixes::initialize()
 	set_function_ptr(omega::operator_new_array, imageBase + 0x000421A3);
 	set_function_ptr(omega::DestroySomeLayers, imageBase + 0x00023D20);
 	set_function_ptr(omega::DrawLayerXYWHAlpha, "Himorogi.dll", "DrawLayerXYWHAlpha");
+	set_function_ptr(omega::DestroySound, "Himorogi.dll", "DestroySound");
 
 	set_function_ptr(omega::AppendTextA, imageBase + 0x000088F0); // 781E88F0 - 781E0000
 	set_function_ptr(omega::TextCommand, imageBase + 0x0001EFD0); // 781FEFD0 - 781E0000

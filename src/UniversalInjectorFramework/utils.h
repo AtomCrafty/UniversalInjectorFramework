@@ -3,11 +3,11 @@
 #include <filesystem>
 
 #ifndef DEBUG_LOG
-#define DEBUG_LOG 1
+#define DEBUG_LOG 0
 #endif
 
 #ifndef DEBUG_NOTIFY
-#define DEBUG_NOTIFY 1
+#define DEBUG_NOTIFY 0
 #endif
 
 namespace uif::utils {
@@ -25,6 +25,10 @@ namespace uif::utils {
 	void* parse_address(const nlohmann::json& json);
 	void* parse_address(const std::string& string);
 	[[noreturn]] void fail(const std::string& reason);
+
+#pragma region Debug Logging
+	// These are declared here in the hopes that the calls
+	// will be omitted if the preprocessor symbols are false
 
 	inline void debug_notify(const char* caption, const char* message, UINT type = MB_OK | MB_ICONINFORMATION)
 	{
@@ -63,4 +67,6 @@ namespace uif::utils {
 		DeleteFileA("uif_log.log");
 #endif
 	}
+
+#pragma endregion
 }

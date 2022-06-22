@@ -92,6 +92,9 @@
     <ClInclude Include="features\file_monitor.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
+    <ClInclude Include="features\flowers_engine_fixes.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
     <ClInclude Include="callconv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="features\custom_feature.h">
       <Filter>Header Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="proxies\d3dx9_43.h">
+      <Filter>Header Files\proxies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +187,9 @@
     <ClCompile Include="features\file_monitor.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
+    <ClCompile Include="features\flowers_engine_fixes.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
     <ClCompile Include="features\memory_patcher.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
@@ -195,6 +204,9 @@
     </ClCompile>
     <ClCompile Include="features\custom_feature.cpp">
       <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="proxies\d3dx9_43.cpp">
+      <Filter>Source Files\proxies</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -220,6 +232,9 @@
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\winmm.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\d3dx9_43.def">
       <Filter>Source Files\proxies</Filter>
     </None>
   </ItemGroup>

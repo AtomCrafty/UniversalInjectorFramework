@@ -33,20 +33,28 @@
       <Configuration>d3dcompiler_43</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="dxgi|Win32">
-      <Configuration>dxgi</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="dxgi|x64">
-      <Configuration>dxgi</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="d3dcompiler_47|Win32">
       <Configuration>d3dcompiler_47</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="d3dcompiler_47|x64">
       <Configuration>d3dcompiler_47</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="d3dx9_43|Win32">
+      <Configuration>d3dx9_43</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="d3dx9_43|x64">
+      <Configuration>d3dx9_43</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="dxgi|Win32">
+      <Configuration>dxgi</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="dxgi|x64">
+      <Configuration>dxgi</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="opengl32|Win32">
@@ -140,6 +148,14 @@
       <ModuleDefinitionFile>proxies\d3d9.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='d3dx9_43'">
+    <ClCompile>
+      <PreprocessorDefinitions>UIF_LIB_D3DX9_43;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>proxies\d3dx9_43.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='d3d11'">
     <ClCompile>
       <PreprocessorDefinitions>UIF_LIB_D3D11;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -205,6 +221,7 @@
     <ClInclude Include="proxies\d3d9.h" />
     <ClInclude Include="proxies\d3dcompiler_43.h" />
     <ClInclude Include="proxies\d3dcompiler_47.h" />
+    <ClInclude Include="proxies\d3dx9_43.h" />
     <ClInclude Include="proxies\dxgi.h" />
     <ClInclude Include="encoding.h" />
     <ClInclude Include="features\font_manager.h" />
@@ -235,6 +252,7 @@
     <ClCompile Include="proxies\d3dcompiler_47.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="proxies\d3d9.cpp" />
+    <ClCompile Include="proxies\d3dx9_43.cpp" />
     <ClCompile Include="proxies\dxgi.cpp" />
     <ClCompile Include="encoding.cpp" />
     <ClCompile Include="features\font_manager.cpp" />
@@ -263,6 +281,7 @@
     <None Include="proxies\d3d9.def" />
     <None Include="proxies\d3dcompiler_43.def" />
     <None Include="proxies\d3dcompiler_47.def" />
+    <None Include="proxies\d3dx9_43.def" />
     <None Include="proxies\dxgi.def" />
     <None Include="proxies\opengl32.def" />
     <None Include="proxies\winmm.def" />

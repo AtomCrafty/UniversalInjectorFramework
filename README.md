@@ -17,10 +17,18 @@ The following sections will explain all the default features and their configura
 - [Character Substitution](#character-substitution)
 - [Tunnel Decoder](#tunnel-decoder)
 - [Font Manager](#font-manager)
+- [Window Manager](#window-manager)
+- [File Monitor](#file-monitor)
 - [Play Timer](#play-timer)
 
 ## Injector
-This isn't actually a feature, but rather the general configuration for the injector itself (the component that is responsible for managing the other features). The injector currently has two options: `hook_modules` and `load_modules`.
+This isn't actually a feature, but rather the general configuration for the injector itself (the component that is responsible for managing the other features). These are the available options:
+
+If `/injector/enable` is set to false, the injector will just load the [original dll](#what-is-a-proxy) and terminate immediately. If the field does not exist or contains any other value, the injection process will continue as usual.
+
+The `target_module` option lets you specify which module's entry point should be highjacked to perform the injector initialization. In most cases this will be the app executable, so omitting the option will default to that. This is mainly useful when the injector is not a direct dependency of the .exe, but loaded at runtime - either via an explicitly LoadLibrary call or via [delay-loading](https://docs.microsoft.com/en-us/cpp/build/reference/linker-support-for-delay-loaded-dlls?view=msvc-170).
+
+The `print_loade_modules` option - if set to true - will print a list of all loaded modules _before injector initialization_. This is purely meant for debugging purposes.
 
 `hook_modules` is an array of names referring to modules loaded by the target executable. When a feature attempts to hook an import, the imported function will be hooked in the main executable as well as in all modules listed here. Make sure this list does not contain the name of your proxy dll, as that would mess with the imports of the injector itself.
 
@@ -29,6 +37,9 @@ This isn't actually a feature, but rather the general configuration for the inje
 ```json
 {
   "injector": {
+    "enable": true,
+    "target_module": "Engine.dll",
+    "print_loaded_modules": false,
     "load_modules": [
       "plugin/EngineHelpers.dll"
     ],
@@ -77,7 +88,7 @@ This feature allows to replace certain characters by others. It can be used to p
 
 The character substitution feature can be used to replace supported characters you don't need by characters you _do_ need.
 
-To enable the feature, set the `/character_substitution/enable` option to true. You will also need to set `source_characters` and `target_characters` options to tell the feature which characters should be mapped to which.
+To enable the feature, set the `/character_substitution/enable` option to true. You will also need to set the `source_characters` and `target_characters` options to tell the feature which characters should be mapped to which.
 
 The configuration file below would replace all occurrences of `ｱ` by `á`, `ｲ` by `í`, and so on.
 
@@ -124,7 +135,7 @@ To only allow monospaced fonts, set the value to 1, for variable pitch set it to
 
 For more information read the description of the `iPitchAndFamily` parameter in the [Microsoft Documentation](https://docs.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createfonta).
 
-`filter_chatset` allows you to only allow fonts, which support a certain character set. Japanese engines often set this to SHIFTJIS_CHARSET (128), which excludes most fonts, since they don't contain kanji.
+`filter_charset` allows you to only allow fonts, which support a certain character set. Japanese engines often set this to SHIFTJIS_CHARSET (128), which excludes most fonts, since they don't contain kanji.
 You probably want this to be either 1 (allow only ansi-compatible fonts), or 0 (allow all fonts).
 
 `spoof_charset` specifies a value that will be reported to the engine as the real charset of each font. This is necessary in case the engine applies its own filter logic to the returned list of fonts. For Japanese engines, this value should likely be 128.
@@ -155,6 +166,23 @@ Finally there is the `override_face` option, which allows you to override which 
       "override_charset": 0
     }
   }
+}
+```
+
+## Window Manager
+The window manager currently only allows changing the title of windows opened by the application. To enable it, set the option `/window_manager/enable` to true.
+
+If the option `overwrite_title` is set, all newly created windows will use the specified title instead.
+
+In case the window was already created before the proxy dll is loaded, set the `process_existing_windows` option to true. This will update the titles of all existing top-level windows of the current process.
+
+```json
+{
+  "window_manager": {
+    "enable": true,
+    "overwrite_title": "My Window Title",
+    "process_existing_windows": true
+  },
 }
 ```
 
@@ -223,7 +251,7 @@ The auto save feature is useful in case the application crashes, because then th
 
 ## Building
 
-UIF comes as a Visual Studio solution, so building should be as simple as loading it in VS and hitting build.
+UIF comes as a Visual Studio solution, so building should be as simple as loading it in VS and hitting build. Note that it is targeted at platform toolset version 143, so make sure the correct C++ build tools are installed. To use the generated dll on older Windows versions, you might need to install the VC++ Redistributables on the target machine.
 
 Make sure to select the build configuration applicable to your chosen [proxy](#what-is-a-proxy) and the correct target platform.
 If none of the provided proxies suit your needs, you will need to [add your own one](#creating-new-proxies).
@@ -246,7 +274,9 @@ The `initialize` method will usually parse the feature configuration and install
 
 The `finalize` method should make sure to uninstall all hooks added during initialization.
 
-When adding a new feature, make sure to add a call to `initialize_feature` in `injector::attach`.
+An empty feature stub exists, called `custom_feature`. It is already pre-configured, so you can simply start writing your custom logic in there.
+
+Should you choose to add a new feature anyway, make sure to add a call to `initialize_feature` in `injector::attach`.
 
 ## Proxies
 
@@ -262,9 +292,12 @@ UIF can mimic the following Windows dlls by default:
 - d3d8.dll
 - d3d9.dll
 - d3d11.dll
+- d3dcompiler_43.dll
 - d3dcompiler_47.dll
+- d3dx9_43.dll
 - dxgi.dll
 - opengl.dll
+- winmm.dll
 
 If your target application doesn't depend on any of these, you will need to add another proxy using the following steps:
 

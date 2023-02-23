@@ -29,6 +29,7 @@ namespace uif::features
 		[[nodiscard]] nlohmann::json& config() const { return _config; }
 		[[nodiscard]] const std::string& name() const { return _name; }
 		[[nodiscard]] bool is_enabled() const { return _enabled; }
+		[[nodiscard]] bool is_debugging_enabled() const { return _debug; }
 
 	private:
 		uif::injector& _injector;
@@ -37,6 +38,7 @@ namespace uif::features
 
 	protected:
 		bool _enabled = false;
+		bool _debug = false;
 	};
 
 	extern std::ostream& operator<<(std::ostream& os, const feature_base& feature);

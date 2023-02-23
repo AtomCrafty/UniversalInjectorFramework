@@ -22,7 +22,9 @@ bool uif::features::feature_base::try_init()
 
 bool uif::features::feature_base::pre_init()
 {
-	return config().is_object() && config().value("enable", false);
+	if (!config().is_object()) return false;
+	_debug = config().value("debug", false);
+	return config().value("enable", false);
 }
 
 std::ostream& uif::features::operator<<(std::ostream& os, const feature_base& feature)

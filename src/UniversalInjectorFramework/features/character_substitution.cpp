@@ -14,11 +14,18 @@ static BOOL __stdcall TextOutWHook(HDC hdc, int x, int y, LPCWSTR lpString, int 
 	std::wstring s = lpString;
 	subst.substitute(s);
 
-	return TextOutW(hdc, x, y, s.c_str(), static_cast<int>(s.length()));
+	if(subst.is_debugging_enabled())
+	{
+		std::wcout << lpString << L" => " << s << L"\n";
+	}
+
+	return TextOutW(hdc, x, y, s.c_str(), c);
 }
 
 static BOOL __stdcall TextOutAHook(HDC hdc, int x, int y, LPCSTR lpString, int c) {
-	const auto s = encoding::shiftjis_to_utf16(lpString);
+	std::string truncated = lpString;
+	truncated.resize(c);
+	const auto s = encoding::shiftjis_to_utf16(truncated);
 	return TextOutWHook(hdc, x, y, s.c_str(), static_cast<int>(s.length()));
 }
 
@@ -29,7 +36,9 @@ static DWORD  __stdcall GetGlyphOutlineWHook(HDC hdc, UINT uChar, UINT fuFormat,
 	const auto& subst = uif::injector::instance().feature<uif::features::character_substitution>();
 	const auto& map = subst.substitutions;
 
-	const auto it = map.find(static_cast<wchar_t>(uChar));
+	const auto wChar = static_cast<wchar_t>(uChar);
+
+	const auto it = map.find(wChar);
 	if(it != map.end())
 	{
 		uChar = it->second;
@@ -38,7 +47,8 @@ static DWORD  __stdcall GetGlyphOutlineWHook(HDC hdc, UINT uChar, UINT fuFormat,
 	return GetGlyphOutlineW(hdc, uChar, fuFormat, lpgm, cjBuffer, pvBuffer, lpmat2);
 }
 
-static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, MAT2* lpmat2) {
+static DWORD __stdcall GetGlyphOutlineAHook(HDC hdc, UINT uChar, UINT fuFormat, LPGLYPHMETRICS lpgm, DWORD cjBuffer, LPVOID pvBuffer, MAT2* lpmat2)
+{
 	char a[3] = { 0 };
 	if(uChar < 0x100)
 	{

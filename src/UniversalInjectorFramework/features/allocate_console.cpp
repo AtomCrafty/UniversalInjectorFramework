@@ -56,12 +56,6 @@ static bool enable_vt_mode()
 	return SetConsoleMode(hOut, dwMode);
 }
 
-bool uif::features::allocate_console::pre_init()
-{
-	if(config().is_boolean()) return config().get<bool>();
-	return feature_base::pre_init();
-}
-
 void uif::features::allocate_console::initialize()
 {
 	alloc_console();

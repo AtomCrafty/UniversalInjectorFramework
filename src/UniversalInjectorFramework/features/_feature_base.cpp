@@ -22,6 +22,7 @@ bool uif::features::feature_base::try_init()
 
 bool uif::features::feature_base::pre_init()
 {
+	if (config().is_boolean()) return config().get<bool>();
 	if (!config().is_object()) return false;
 	_debug = config().value("debug", false);
 	return config().value("enable", false);

@@ -7,7 +7,6 @@ namespace uif::features
 	{
 	public:
 		explicit allocate_console(uif::injector& injector) : feature_base(injector, "allocate_console") {}
-		bool pre_init() override;
 		void initialize() override;
 		void finalize() override;
 	};

@@ -43,10 +43,12 @@ namespace uif
 
 		enabled = config().value("/injector/enable"_json_pointer, true);
 		if(!enabled) {
+			utils::debug_log("injector::attach: disabled");
 			libraries::load();
 			return;
 		}
 
+		utils::debug_log("injector::attach: enabled");
 		initialize_feature<features::allocate_console>();
 		
 		std::cout << white("[injector] ======================================================\n");

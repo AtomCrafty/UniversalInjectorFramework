@@ -10,8 +10,10 @@ extern "C" {
 	void Detach() { uif::injector::instance().detach(); }
 	void Attach()
 	{
+		uif::utils::debug_log("Attach: run");
 		if (IsHooked)
 		{
+			uif::utils::debug_log("Attach: unhook");
 			DetourTransactionBegin();
 			DetourDetach(&EntryPoint, EntryPointHook);
 			DetourTransactionCommit();
@@ -23,6 +25,14 @@ extern "C" {
 void InstallDelayedAttachHook()
 {
 	uif::utils::debug_log("InstallDelayedAttachHook: start");
+
+	if(uif::injector::instance().config().value("/injector/inject_directly"_json_pointer, false))
+	{
+		uif::utils::debug_log("InstallDelayedAttachHook: direct attach");
+		Attach();
+		return;
+	}
+
 	const auto targetModuleName = uif::injector::instance().config().value("/injector/target_module"_json_pointer, "");
 	if (targetModuleName.empty())
 	{

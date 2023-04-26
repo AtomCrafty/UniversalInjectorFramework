@@ -29,7 +29,7 @@ namespace uif
 		return *_instance;
 	}
 
-	injector::injector() : game_module(GetModuleHandle(nullptr)), _config("config.json") {}
+	injector::injector() : game_module(GetModuleHandle(nullptr)), _config("uif_config.json") {}
 
 	config& injector::config()
 	{

@@ -20,12 +20,14 @@ namespace uif
 				break;
 			}
 
-			if(!dir.has_parent_path())
+			std::filesystem::path parent = dir.parent_path();
+			
+			if(parent.empty() || parent == dir)
 			{
-				utils::fail("Failed to open config file in " + utils::get_dll_path().parent_path().string() + ".");
+				utils::fail("Failed to open config file " + path + " in " + utils::get_dll_path().parent_path().string() + ".");
 			}
 
-			dir = dir.parent_path();
+			dir = parent;
 		}
 
 		try

@@ -12,6 +12,7 @@
 #include "features/tunnel_decoder.h"
 #include "features/file_monitor.h"
 #include "features/font_manager.h"
+#include "features/locale_emulator.h"
 #include "features/memory_patcher.h"
 #include "features/play_timer.h"
 #include "features/window_manager.h"
@@ -123,6 +124,7 @@ namespace uif
 		initialize_feature<features::tunnel_decoder>();
 		initialize_feature<features::file_monitor>();
 		initialize_feature<features::font_manager>();
+		initialize_feature<features::locale_emulator>();
 		initialize_feature<features::window_manager>();
 		initialize_feature<features::memory_patcher>();
 		initialize_feature<features::play_timer>();

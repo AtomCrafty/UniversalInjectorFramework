@@ -25,10 +25,12 @@ static int CALLBACK enum_fonts_proc_a(const LOGFONTA* lplf, const TEXTMETRICA* l
 	auto* info = reinterpret_cast<enum_fonts_info*>(lParam);
 	info->totalCount++;
 
+	//const std::wstring fontName = encoding::shiftjis_to_utf16(lplf->lfFaceName);
+	//std::cout << *info->fontManager << " Font: ";
+	//std::wcout << fontName << L'\n';
+
 	if(info->settings->filterPitchAndFamily && !(info->settings->filterPitchAndFamilyValue & lplf->lfPitchAndFamily))
 		return 1;
-
-	//std::cout << *info->fontManager << " Font: " << lplf->lfFaceName << '\n';
 
 	info->enabledCount++;
 
@@ -44,10 +46,11 @@ static int CALLBACK enum_fonts_proc_w(const LOGFONTW* lplf, const TEXTMETRICW* l
 	auto* info = reinterpret_cast<enum_fonts_info*>(lParam);
 	info->totalCount++;
 
+	//std::cout << *info->fontManager << " Font: ";
+	//std::wcout << lplf->lfFaceName << L'\n';
+
 	if(info->settings->filterPitchAndFamily && !(info->settings->filterPitchAndFamilyValue & lplf->lfPitchAndFamily))
 		return 1;
-
-	//std::cout << *info->fontManager << " Font: " << lplf->lfFaceName << '\n';
 
 	info->enabledCount++;
 

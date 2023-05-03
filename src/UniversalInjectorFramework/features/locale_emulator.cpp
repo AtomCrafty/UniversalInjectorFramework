@@ -107,7 +107,7 @@ typedef DWORD(WINAPI* LeCreateProcess_t)(
 
 // https://github.com/arcusmaximus/VNTranslationTools/blob/main/VNTextProxy/LocaleEmulator.cpp
 
-bool uif::features::locale_emulator::relaunch(HANDLE* pProcessHandle) const
+bool uif::features::locale_emulator::relaunch(ML_PROCESS_INFORMATION* pProcessInfo) const
 {
 	std::cout << *this << " Attempting to relaunch with codepage " << codepage << "\n";
 
@@ -173,15 +173,12 @@ bool uif::features::locale_emulator::relaunch(HANDLE* pProcessHandle) const
 		currentDirectory,
 		0,
 		&startInfo,
-		&processInfo,
+		pProcessInfo != nullptr ? pProcessInfo : &processInfo,
 		nullptr,
 		nullptr,
 		nullptr,
 		nullptr
 	);
-
-	if (pProcessHandle != nullptr)
-		*pProcessHandle = processInfo.hProcess;
 
 	return result == ERROR_SUCCESS;
 }
@@ -202,22 +199,22 @@ void uif::features::locale_emulator::initialize()
 
 	std::cout << *this << " Codepage " << GetACP() << " did not match expectation (" << codepage << ")\n";
 
-	HANDLE hProcess;
-	if (!relaunch(&hProcess)) {
+	ML_PROCESS_INFORMATION processInfo;
+	if (!relaunch(&processInfo)) {
 		std::cout << *this << " Failed to relaunch. Continuing with default locale\n";
 		return;
 	}
 
+	std::cout << *this << " Relaunch successful (child process " << processInfo.dwProcessId << ")\n";
+
 	if(wait_for_exit)
 	{
-		std::cout << *this << " Relaunch successful. Waiting for process termination\n";
-		WaitForSingleObject(hProcess, INFINITE);
-		std::cout << *this << " Child process ended. Terminating original instance\n";
+		std::cout << *this << " Waiting for child process to end\n";
+		WaitForSingleObject(processInfo.hProcess, INFINITE);
+		std::cout << *this << " Child process ended\n";
 	}
-	else
-	{
-		std::cout << *this << " Relaunch successful. Terminating original instance\n";
-	}
+
+	std::cout << *this << " Terminating parent process\n";
 
 	ExitProcess(0);
 }

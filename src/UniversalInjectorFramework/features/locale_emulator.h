@@ -1,6 +1,8 @@
 #pragma once
 #include "_feature_base.h"
 
+struct ML_PROCESS_INFORMATION;
+
 namespace uif::features
 {
 	class locale_emulator final : public feature_base
@@ -17,6 +19,6 @@ namespace uif::features
 		ULONG charset = 0;
 		std::string timezone{};
 
-		bool relaunch(HANDLE* pProcessHandle = nullptr) const;
+		bool relaunch(ML_PROCESS_INFORMATION* pProcessInfo) const;
 	};
 }

@@ -46,6 +46,23 @@ static int measure_first_char(const char* text, int fontId)
 	return size.cx;
 }
 
+static int __cdecl HandleControlSequence_L(yuka::Layer* messageLayer, const char* text)
+{
+	if (text[0] != '@' || text[1] != 'l' || text[2] != '(')
+		return 1;
+
+	const char* start = &text[3];
+	const char* end = strchr(text, ')');
+
+	if (end == nullptr) return 1;
+
+	const int len = end - start;
+
+	std::cout << std::string(start, end) << '\n';
+
+	return end - text + 1;
+}
+
 static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::ScriptContext* ctx)
 {
 	//std::cout << "ProcessText: " << text << "\n";
@@ -90,6 +107,9 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 
 		if(text[1] == 'm')
 			return HandleControlSequence_M(layer, text);
+
+		if (text[1] == 'l')
+			return HandleControlSequence_L(layer, text);
 
 		if(text[1] == 'g' && text[2] == 'f')
 			return HandleControlSequence_GF(layer, text);

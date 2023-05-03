@@ -17,6 +17,7 @@ The following sections will explain all the default features and their configura
 - [Character Substitution](#character-substitution)
 - [Tunnel Decoder](#tunnel-decoder)
 - [Font Manager](#font-manager)
+- [Locale Emulator](#locale-emulator)
 - [Window Manager](#window-manager)
 - [File Monitor](#file-monitor)
 - [Play Timer](#play-timer)
@@ -165,6 +166,33 @@ Finally there is the `override_face` option, which allows you to override which 
       "override_face": "Arial Rounded MT Bold",
       "override_charset": 0
     }
+  }
+}
+```
+
+## Locale Emulator
+
+This feature allows you to automatically relaunch the application if it is not launched with the correct ansi code page. To enable it, set the option `/locale_emulator/enable` to true.
+
+In order to use this feature you will also need to download `LoaderDll.dll` and `LocaleEmulator.dll` from the [Locale Emulator](https://pooi.moe/Locale-Emulator/) project and place them next to your app executable.
+
+There are several options to specify the desired locale environment.
+- `codepage` specifies which code page your application expects to run with. The default value is `932`, which specifies the Japanese `Shift-JIS` code page. If the application is not stared with this code page, it will attempt to relaunch itself via Locale Emulator.
+- `locale` specifies the desired [LCID](https://learn.microsoft.com/en-us/openspecs/office_standards/ms-oe376/6c085406-a698-4e12-9d4d-c3b0ee3dbc4a), with a default value of `1041` (Japanese).
+- `charset` specifies the default character set. Its default value is `128`, the value of the `SHIFTJIS_CHARSET` constant.
+- `timezone` allows you to specify a time zone to be emulated. The default value is `Tokyo Standard Time`. Available time zone names can be found under `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Time Zones`.
+
+Finally, the `wait_for_exit` option controls when the parent process terminates. If set to true, it will wait until the child process ended, otherwise it will exit immediately.
+
+```json
+{
+  "locale_emulator": {
+    "enable": true,
+    "codepage": 932,
+    "locale": 1041,
+    "charset": 128,
+    "timezone": "Tokyo Standard Time",
+    "wait_for_exit": false
   }
 }
 ```

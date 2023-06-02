@@ -20,7 +20,6 @@ static int(__cdecl* HandleControlSequence_R)(yuka::Layer* messageLayer, const ch
 static int(__cdecl* HandleControlSequence_M)(yuka::Layer* messageLayer, const char* text);
 static int(__cdecl* HandleControlSequence_GF)(yuka::Layer* messageLayer, const char* text);
 static int(__cdecl* HandleControlSequence_OF)(yuka::Layer* messageLayer, const char* text);
-static bool(__cdecl* EnterFullscreenMode)(HWND hWnd, int width, int height);
 static bool(__cdecl* RestoreDisplayMode)();
 static void(__cdecl* LoadCursors)();
 
@@ -217,15 +216,7 @@ public:
 		if (fullscreen)
 		{
 			CalculateViewport(screenWidth, screenHeight);
-
-			//if (!EnterFullscreenMode(hWnd, screenWidth, screenHeight))
-			//{
-			//	return SetWindowMode(false);
-			//}
-			//
-			//SetWindowLongA(hWnd, GWL_STYLE, GetWindowLongA(hWnd, GWL_STYLE) | WS_VISIBLE);
-			//SetWindowPos(hWnd, nullptr, 0, 0, screenWidth, screenHeight, SWP_DRAWFRAME | SWP_NOZORDER);
-
+			
 			HMONITOR hmon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 			MONITORINFO mi = { sizeof mi };
 			if (!GetMonitorInfo(hmon, &mi)) return false;
@@ -339,7 +330,7 @@ public:
 		}
 		else
 		{
-			SetStretchBltMode(dstDc, 4);
+			SetStretchBltMode(dstDc, STRETCH_HALFTONE);
 			SetBrushOrgEx(dstDc, 0, 0, nullptr);
 			StretchBlt(
 				dstDc,
@@ -436,7 +427,6 @@ void uif::features::yuka_engine_fixes::initialize()
 	get_address(0x00431400, HandleControlSequence_M, "handle_control_sequence_m");
 	get_address(0x004315B0, HandleControlSequence_GF, "handle_control_sequence_gf");
 	get_address(0x00431720, HandleControlSequence_OF, "handle_control_sequence_of");
-	get_address(0x004099D0, EnterFullscreenMode, "enter_fullscreen_mode");
 	get_address(0x00406140, RestoreDisplayMode, "restore_display_mode");
 	get_address(0x00428210, LoadCursors, "load_cursors");
 

@@ -65,6 +65,14 @@
       <Configuration>opengl32</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="version|Win32">
+      <Configuration>version</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="version|x64">
+      <Configuration>version</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="winmm|Win32">
       <Configuration>winmm</Configuration>
       <Platform>Win32</Platform>
@@ -196,6 +204,14 @@
       <ModuleDefinitionFile>proxies\opengl32.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='version'">
+    <ClCompile>
+      <PreprocessorDefinitions>UIF_LIB_VERSION;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>proxies\version.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='winmm'">
     <ClCompile>
       <PreprocessorDefinitions>UIF_LIB_WINMM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -237,6 +253,7 @@
     <ClInclude Include="proxies\d3dx9_43.h" />
     <ClInclude Include="proxies\dxgi.h" />
     <ClInclude Include="proxies\opengl32.h" />
+    <ClInclude Include="proxies\version.h" />
     <ClInclude Include="proxies\winmm.h" />
   </ItemGroup>
   <ItemGroup>
@@ -270,6 +287,7 @@
     <ClCompile Include="proxies\d3dx9_43.cpp" />
     <ClCompile Include="proxies\dxgi.cpp" />
     <ClCompile Include="proxies\opengl32.cpp" />
+    <ClCompile Include="proxies\version.cpp" />
     <ClCompile Include="proxies\winmm.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +304,7 @@
     <None Include="proxies\d3dx9_43.def" />
     <None Include="proxies\dxgi.def" />
     <None Include="proxies\opengl32.def" />
+    <None Include="proxies\version.def" />
     <None Include="proxies\winmm.def" />
   </ItemGroup>
   <ItemGroup>

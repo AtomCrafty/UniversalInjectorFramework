@@ -119,6 +119,9 @@
     <ClInclude Include="features\locale_emulator.h">
       <Filter>Header Files\features</Filter>
     </ClInclude>
+    <ClInclude Include="proxies\version.h">
+      <Filter>Header Files\proxies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -208,6 +211,9 @@
     <ClCompile Include="features\locale_emulator.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
+    <ClCompile Include="proxies\version.cpp">
+      <Filter>Source Files\proxies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="proxies\d3dcompiler_47.def">
@@ -235,6 +241,9 @@
       <Filter>Source Files\proxies</Filter>
     </None>
     <None Include="proxies\d3dx9_43.def">
+      <Filter>Source Files\proxies</Filter>
+    </None>
+    <None Include="proxies\version.def">
       <Filter>Source Files\proxies</Filter>
     </None>
   </ItemGroup>

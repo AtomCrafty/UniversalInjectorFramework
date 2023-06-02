@@ -199,6 +199,8 @@ void uif::features::locale_emulator::initialize()
 
 	std::cout << *this << " Codepage " << GetACP() << " did not match expectation (" << codepage << ")\n";
 
+	Sleep(5000);
+
 	ML_PROCESS_INFORMATION processInfo;
 	if (!relaunch(&processInfo)) {
 		std::cout << *this << " Failed to relaunch. Continuing with default locale\n";

@@ -55,6 +55,9 @@ static int measure_first_char(const char* text, int fontId)
 	return size.cx;
 }
 
+static std::string baseWindowTitle{};
+static std::string lastWindowTitle{};
+
 static int __cdecl HandleControlSequence_L(yuka::Layer* messageLayer, const char* text)
 {
 	if (text[0] != '@' || text[1] != 'l' || text[2] != '(')
@@ -67,7 +70,91 @@ static int __cdecl HandleControlSequence_L(yuka::Layer* messageLayer, const char
 
 	const int len = end - start;
 
-	std::cout << std::string(start, end) << '\n';
+	//__debugbreak();
+
+	const int oldWindowTitleLength = GetWindowTextLengthA(GlobalMainWindow->hWnd);
+	std::string oldWindowTitle{};
+	oldWindowTitle.resize(oldWindowTitleLength + 1);
+	GetWindowTextA(GlobalMainWindow->hWnd, oldWindowTitle.data(), oldWindowTitleLength + 1);
+	oldWindowTitle.resize(strlen(oldWindowTitle.c_str()));
+
+	//std::cout << "last: " << lastWindowTitle << '\n';
+	//std::cout << "base: " << baseWindowTitle << '\n';
+
+	if (lastWindowTitle != oldWindowTitle) {
+		baseWindowTitle.assign(oldWindowTitle);
+	}
+
+	std::string newWindowTitle{};
+	newWindowTitle.append(baseWindowTitle);
+	newWindowTitle.append(" [");
+	newWindowTitle.append(start, end);
+	newWindowTitle.append("]");
+
+	lastWindowTitle.assign(newWindowTitle);
+	SetWindowTextA(GlobalMainWindow->hWnd, newWindowTitle.c_str());
+
+	//std::cout << "old: " << oldWindowTitle << '\n';
+	//std::cout << "new: " << newWindowTitle << '\n';
+
+	//std::cout << std::string(start, end) << '\n';
+
+	return end - text + 1;
+}
+
+static int __cdecl HandleControlSequence_R2(yuka::Layer* messageLayer, const char* text)
+{
+	if (text[0] != '@' || text[1] != 'r' || text[2] != '(')
+		return 1;
+
+	const char* start = &text[3];
+	const char* comma = strchr(text, ',');
+	const char* end = strchr(text, ')');
+
+	if (comma == nullptr || end == nullptr) return 1;
+
+	const std::string charCountText(start, comma - start);
+	const std::string rubyText(comma + 1, end - comma - 1);
+
+	const int charCount = strtol(charCountText.c_str(), nullptr, 10);
+
+	const char* textPtr = end + 1;
+	for (int i = 0; i < charCount; i++)
+	{
+		if (!*textPtr) break;
+		textPtr += IsDBCSLeadByteEx(932, *textPtr) ? 2 : 1;
+	}
+
+	const std::string measureText(end + 1, textPtr);
+
+	SIZE baseSize, rubySize;
+	YFontInfo_MeasureText(&GlobalFontTable[messageLayer->fontId], measureText.c_str(), &baseSize);
+	YFontInfo_MeasureText(&GlobalFontTable[GameGlobals->rubyFontId], rubyText.c_str(), &rubySize);
+
+	int posX = messageLayer->cursorX + (baseSize.cx - rubySize.cx) / 2;
+	int posY = messageLayer->cursorY - rubySize.cy;
+
+	//__debugbreak();
+
+	auto* sprite = make_new<yuka::Sprite>();
+	YSprite_CreateFromString(sprite, rubyText.c_str(), posX, posY, GameGlobals->rubyFontId, messageLayer->textColor, messageLayer->fontEffect, messageLayer->shadowColor, messageLayer->borderColor);
+	sprite->isVisible = true;
+	YLayer_AddSprite(messageLayer, sprite);
+	YGraphicsContext_Invalidate(messageLayer->graphics,
+		static_cast<int>(messageLayer->spriteOffsetX) + sprite->x - 1,
+		static_cast<int>(messageLayer->spriteOffsetY) + sprite->y - 1,
+		static_cast<int>(messageLayer->spriteOffsetX) + sprite->x + sprite->w + 1,
+		static_cast<int>(messageLayer->spriteOffsetY) + sprite->y + sprite->h + 1);
+
+	//const int cursorX = messageLayer->cursorX;
+	//const int cursorY = messageLayer->cursorY;
+	//const int cursorWithoutAutoWrapX = messageLayer->cursorWithoutAutoWrapX;
+	//const int cursorWithoutAutoWrapY = messageLayer->cursorWithoutAutoWrapY;
+
+	//messageLayer->cursorX = cursorX;
+	//messageLayer->cursorY = cursorY;
+	//messageLayer->cursorWithoutAutoWrapX = cursorWithoutAutoWrapX;
+	//messageLayer->cursorWithoutAutoWrapY = cursorWithoutAutoWrapY;
 
 	return end - text + 1;
 }
@@ -112,7 +199,7 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 	if (*text == '@')
 	{
 		if (text[1] == 'r')
-			return HandleControlSequence_R(layer, text);
+			return HandleControlSequence_R2(layer, text);
 
 		if (text[1] == 'm')
 			return HandleControlSequence_M(layer, text);
@@ -182,6 +269,9 @@ public:
 			static_cast<int>(layer->spriteOffsetY) + sprite->y + sprite->h);
 
 		layer->cursorX += measure_first_char(text, layer->fontId);
+
+		layer->cursorWithoutAutoWrapX = layer->cursorX;
+		layer->cursorWithoutAutoWrapY = layer->cursorY;
 
 		if (layer->cursorXLimit && layer->cursorX >= layer->cursorXLimit)
 		{

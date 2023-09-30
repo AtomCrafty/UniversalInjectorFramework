@@ -1,7 +1,9 @@
 #include "pch.h"
 #include "yuka_engine_fixes.h"
 
-#include "ansi.h"
+#pragma comment(lib, "Winmm.lib")
+#include <mmsystem.h>
+
 #include "config.h"
 #include "hooks.h"
 #include "utils.h"
@@ -23,28 +25,60 @@ static int(__cdecl* HandleControlSequence_OF)(yuka::Layer* messageLayer, const c
 static bool(__cdecl* RestoreDisplayMode)();
 static void(__cdecl* LoadCursors)();
 
-static void(__thiscall* YMainWindow_RefreshSynced)(yuka::MainWindow* this_);
-static bool(__thiscall* YMainWindow_SetWindowMode)(yuka::MainWindow* this_, bool fullscreen);
-static void(__thiscall* YMainWindow_AdjustWindowRect)(yuka::MainWindow* this_, RECT* rect);
-static LRESULT(__thiscall* YMainWindow_WindowProc)(yuka::MainWindow* this_, HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-static void(__thiscall* YMainWindow_Repaint)(yuka::MainWindow* this_, RECT* area);
-static bool(__thiscall* YMainWindow_Create)(yuka::MainWindow* this_);
-static void(__thiscall* YSync_WaitForRepaint)(yuka::Sync* this_);
+static void(__thiscall* YWindow_RefreshSynced)(yuka::Window* this_);
+static bool(__thiscall* YWindow_SetWindowMode)(yuka::Window* this_, bool fullscreen);
+static void(__thiscall* YWindow_AdjustWindowRect)(yuka::Window* this_, RECT* rect);
+static LRESULT(__thiscall* YMainWindow_WindowProc)(yuka::Window* this_, HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+static void(__thiscall* YWindow_Repaint)(yuka::Window* this_, RECT* area);
+static bool(__thiscall* YWindow_Create)(yuka::Window* this_);
+static void(__thiscall* YRenderThread_WaitForRepaint)(yuka::RenderThread* this_);
 static void(__thiscall* YGraphicsContext_Invalidate)(yuka::GraphicsContext* this_, int x1, int y1, int x2, int y2);
+static yuka::Layer* (__thiscall* YGraphicsContext_FindLayer)(yuka::GraphicsContext* this_, int layerId);
+static yuka::Layer* (__thiscall* YGraphicsContext_CreateLayer)(yuka::GraphicsContext* this_, int layerId);
+static bool(__thiscall* YGraphicsContext_DestroyLayer)(yuka::GraphicsContext* this_, int layerId);
 static bool(__thiscall* YFontInfo_MeasureText)(yuka::FontInfo* this_, const char* text, SIZE* pSize);
-static bool(__thiscall* YSprite_CreateFromChar)(yuka::Sprite* this_, const char* text, int x, int y, int fontId, int textColor, int a7, int a8, int a9);
+static bool(__thiscall* YSprite_CreateFromChar)(yuka::Sprite* this_, const char* text, int x, int y, int fontId, int textColor, int fontEffect, int shadowColor, int borderColor);
+static bool(__thiscall* YSprite_CreateFromString)(yuka::Sprite* this_, const char* text, int x, int y, int fontId, int textColor, int fontEffect, int shadowColor, int borderColor);
+static bool(__thiscall* YLayer_SetVisible)(yuka::Layer* this_, bool visible);
 static bool(__thiscall* YLayer_AddSprite)(yuka::Layer* this_, yuka::Sprite* sprite);
+static yuka::Sprite* (__thiscall* YLayer_AddStringSprite)(yuka::Layer* this_, const char* text, int fontId, int textColor, int x, int y, int fontEffect, int shadowColor, int borderColor);
 static bool(__thiscall* YLayer_AppendCharacterSprite)(yuka::Layer* this_, const char* text);
-static bool(__thiscall* YLayer_AppendCharacterSpriteInternal)(yuka::Layer* this_, const char* text, int fontId, int textColor, int a5, int a6, int a7);
+static bool(__thiscall* YLayer_AppendCharacterSpriteInternal)(yuka::Layer* this_, const char* text, int fontId, int textColor, int fontEffect, int shadowColor, int borderColor);
+static bool(__thiscall* YLayer_DestroyAllSprites)(yuka::Layer* this_);
+static bool(__thiscall* YLayer_DestroySprite)(yuka::Layer* this_, yuka::Sprite* sprite);
 
-static yuka::ScriptValue* (__cdecl* f_KeyWait)(yuka::ScriptContext* ctx, int argc, void** argv);
-static yuka::ScriptValue* (__cdecl* f_PF)(yuka::ScriptContext* ctx, int argc, void** argv);
-static yuka::ScriptValue* (__cdecl* f_LF)(yuka::ScriptContext* ctx, int argc, void** argv);
+static yuka::ScriptValue* (__cdecl* f_TextBoxSet)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_TextBoxDelete)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_TextBoxStringGet)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_TextBoxStringSet)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_GraphicLoad)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_GraphicLoadHide)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_KeyWait)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_StrOut)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_StrOutNW)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_StrOutNWC)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_PF)(yuka::ScriptContext* ctx, int argc, const void** argv);
+static yuka::ScriptValue* (__cdecl* f_LF)(yuka::ScriptContext* ctx, int argc, const void** argv);
 
 static yuka::FontInfo* GlobalFontTable;
-static yuka::MainWindow* GlobalMainWindow;
-static yuka::Sync* GlobalSync;
+static yuka::Window* GlobalMainWindow;
+static yuka::RenderThread* GlobalRenderThread;
 static yuka::Game* GameGlobals;
+
+class CriticalLock {
+	CRITICAL_SECTION* section;
+
+public:
+	CriticalLock(CRITICAL_SECTION& cs) : section(&cs)
+	{
+		EnterCriticalSection(section);
+	}
+
+	~CriticalLock()
+	{
+		LeaveCriticalSection(section);
+	}
+};
 
 static int measure_first_char(const char* text, int fontId)
 {
@@ -141,10 +175,10 @@ static int __cdecl HandleControlSequence_R2(yuka::Layer* messageLayer, const cha
 	sprite->isVisible = true;
 	YLayer_AddSprite(messageLayer, sprite);
 	YGraphicsContext_Invalidate(messageLayer->graphics,
-		static_cast<int>(messageLayer->spriteOffsetX) + sprite->x - 1,
-		static_cast<int>(messageLayer->spriteOffsetY) + sprite->y - 1,
-		static_cast<int>(messageLayer->spriteOffsetX) + sprite->x + sprite->w + 1,
-		static_cast<int>(messageLayer->spriteOffsetY) + sprite->y + sprite->h + 1);
+		static_cast<int>(messageLayer->offsetX) + sprite->x - 1,
+		static_cast<int>(messageLayer->offsetY) + sprite->y - 1,
+		static_cast<int>(messageLayer->offsetX) + sprite->x + sprite->w + 1,
+		static_cast<int>(messageLayer->offsetY) + sprite->y + sprite->h + 1);
 
 	//const int cursorX = messageLayer->cursorX;
 	//const int cursorY = messageLayer->cursorY;
@@ -171,29 +205,28 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 
 	if (layer->waitForNextPage)
 	{
-		YMainWindow_RefreshSynced(GlobalMainWindow);
-		const bool oldField3D = GlobalMainWindow->field_3D;
-		GlobalMainWindow->field_3D = false;
-		YSync_WaitForRepaint(GlobalSync);
+		YWindow_RefreshSynced(GlobalMainWindow);
+		const bool wasDrawingSuspended = GlobalMainWindow->isDrawingSuspended;
+		GlobalMainWindow->isDrawingSuspended = false;
+		YRenderThread_WaitForRepaint(GlobalRenderThread);
 
 		const std::string temp{ ctx->currentVoiceClipName.value };
 
 		f_KeyWait(ctx, 0, nullptr);
 
-		int fieldC = ctx->field_C;
-		void* params[16];
-		params[0] = &fieldC;
+		int messageLayerId = ctx->messageLayerId;
+		const void* params[16] = { &messageLayerId };
 
 		f_PF(ctx, 1, params);
 
-		layer->cursorX = layer->defaultCursorX;
-		layer->cursorY = layer->defaultCursorY;
+		layer->cursorX = layer->textArea.left;
+		layer->cursorY = layer->textArea.top;
 		layer->waitForNextPage = false;
 
 		ctx->currentVoiceClipName.value.assign(temp);
 
-		YMainWindow_RefreshSynced(GlobalMainWindow);
-		GlobalMainWindow->field_3D = oldField3D;
+		YWindow_RefreshSynced(GlobalMainWindow);
+		GlobalMainWindow->isDrawingSuspended = wasDrawingSuspended;
 	}
 
 	if (*text == '@')
@@ -226,21 +259,21 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 	}
 
 	// emit a line break if the word would overflow the line
-	if (layer->cursorXLimit && layer->cursorX + width >= layer->cursorXLimit)
+	if (layer->textArea.right && layer->cursorX + width >= layer->textArea.right)
 	{
 		const int lineHeight = GlobalFontTable[layer->fontId].charHeight;
-		layer->cursorX = layer->defaultCursorX;
+		layer->cursorX = layer->textArea.left;
 		layer->cursorY += lineHeight;
 
-		if (layer->cursorYLimit && layer->cursorY + lineHeight >= layer->cursorYLimit)
+		if (layer->textArea.bottom && layer->cursorY + lineHeight >= layer->textArea.bottom)
 		{
-			layer->cursorY = layer->defaultCursorY;
+			layer->cursorY = layer->textArea.top;
 			layer->waitForNextPage = true;
 		}
 	}
 
 	// skip whitespace at the start of a line
-	if (text[0] == ' ' && layer->cursorX == layer->defaultCursorX)
+	if (text[0] == ' ' && layer->cursorX == layer->textArea.left)
 		return 1;
 
 	YLayer_AppendCharacterSprite(layer, text);
@@ -251,7 +284,7 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 class YLayer
 {
 public:
-	bool __thiscall AppendCharacterSpriteInternal(const char* text, int fontId, int textColor, int a5, int a6, int a7)
+	bool __thiscall AppendCharacterSpriteInternal(const char* text, int fontId, int textColor, int fontEffect, int shadowColor, int borderColor)
 	{
 		//std::cout << "AppendCharacterSpriteInternalHook: " << text << "\n";
 		//return yuka::YLayer_AppendCharacterSpriteInternal(reinterpret_cast<yuka::Layer*>(this), text, fontId, textColor, a5, a6, a7);
@@ -259,43 +292,42 @@ public:
 		const auto layer = reinterpret_cast<yuka::Layer*>(this);
 
 		auto* sprite = make_new<yuka::Sprite>();
-		YSprite_CreateFromChar(sprite, text, layer->cursorX, layer->cursorY, fontId, textColor, a5, a6, a7);
-		sprite->field_0 = true;
+		YSprite_CreateFromChar(sprite, text, layer->cursorX, layer->cursorY, fontId, textColor, fontEffect, shadowColor, borderColor);
+		sprite->isVisible = true;
 		YLayer_AddSprite(layer, sprite);
 		YGraphicsContext_Invalidate(layer->graphics,
-			static_cast<int>(layer->spriteOffsetX) + sprite->x,
-			static_cast<int>(layer->spriteOffsetY) + sprite->y,
-			static_cast<int>(layer->spriteOffsetX) + sprite->x + sprite->w,
-			static_cast<int>(layer->spriteOffsetY) + sprite->y + sprite->h);
+			static_cast<int>(layer->offsetX) + sprite->x,
+			static_cast<int>(layer->offsetY) + sprite->y,
+			static_cast<int>(layer->offsetX) + sprite->x + sprite->w,
+			static_cast<int>(layer->offsetY) + sprite->y + sprite->h);
 
 		layer->cursorX += measure_first_char(text, layer->fontId);
 
 		layer->cursorWithoutAutoWrapX = layer->cursorX;
 		layer->cursorWithoutAutoWrapY = layer->cursorY;
 
-		if (layer->cursorXLimit && layer->cursorX >= layer->cursorXLimit)
+		if (layer->textArea.right && layer->cursorX >= layer->textArea.right)
 		{
 			const int lineHeight = GlobalFontTable[fontId].charHeight;
-			layer->cursorX = layer->defaultCursorX;
+			layer->cursorX = layer->textArea.left;
 			layer->cursorY += lineHeight;
 
-			if (layer->cursorYLimit && layer->cursorY + lineHeight >= layer->cursorYLimit)
+			if (layer->textArea.bottom && layer->cursorY + lineHeight >= layer->textArea.bottom)
 			{
-				layer->cursorY = layer->defaultCursorY;
+				layer->cursorY = layer->textArea.top;
 				layer->waitForNextPage = true;
 			}
 		}
 
 		return true;
 	}
-
 };
 
-class YMainWindow {
+class YWindow {
 public:
 	bool __thiscall SetWindowMode(bool fullscreen)
 	{
-		const auto window = reinterpret_cast<yuka::MainWindow*>(this);
+		const auto window = reinterpret_cast<yuka::Window*>(this);
 		const auto hWnd = window->hWnd;
 		const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 		const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -306,7 +338,7 @@ public:
 		if (fullscreen)
 		{
 			CalculateViewport(screenWidth, screenHeight);
-			
+
 			HMONITOR hmon = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 			MONITORINFO mi = { sizeof mi };
 			if (!GetMonitorInfo(hmon, &mi)) return false;
@@ -341,7 +373,7 @@ public:
 				window->y = (screenHeight - window->viewportHeight) / 2;
 
 				RECT windowRect{ window->x, window->y, window->x + window->viewportWidth, window->y + window->viewportHeight };
-				YMainWindow_AdjustWindowRect(window, &windowRect);
+				YWindow_AdjustWindowRect(window, &windowRect);
 
 				SetWindowLongA(hWnd, GWL_STYLE, window->style);
 				SetWindowPos(hWnd,
@@ -354,23 +386,27 @@ public:
 			}
 		}
 
-		if (window->graphicsContext)
+		if (window->graphics)
 		{
-			YGraphicsContext_Invalidate(window->graphicsContext, 0, 0, GameGlobals->resolutionX, GameGlobals->resolutionY);
+			YGraphicsContext_Invalidate(window->graphics, 0, 0, GameGlobals->resolutionX, GameGlobals->resolutionY);
 		}
 		LoadCursors();
 		return true;
 	}
 
-	LRESULT __thiscall WindowProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+	LRESULT __thiscall MainWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	{
-		const auto window = reinterpret_cast<yuka::MainWindow*>(this);
+		const auto window = reinterpret_cast<yuka::Window*>(this);
 
-		switch (Msg)
+		if (const LRESULT textBoxResult = TextBoxWindowProc(hWnd, msg, wParam, lParam)) {
+			return textBoxResult;
+		}
+
+		switch (msg)
 		{
 		case WM_SIZING:
 			return FALSE;
-		
+
 		case WM_SIZE: {
 			GameGlobals->isWindowResized = true;
 			const int width = LOWORD(lParam);
@@ -385,13 +421,13 @@ public:
 		}
 
 		default:
-			return YMainWindow_WindowProc(window, hWnd, Msg, wParam, lParam);
+			return YMainWindow_WindowProc(window, hWnd, msg, wParam, lParam);
 		}
 	}
 
 	void __thiscall Repaint(RECT* area)
 	{
-		const auto window = reinterpret_cast<yuka::MainWindow*>(this);
+		const auto window = reinterpret_cast<yuka::Window*>(this);
 
 		if (window->field_1E5 == 1)
 			return;
@@ -443,17 +479,20 @@ public:
 
 	bool __thiscall Create()
 	{
-		const auto window = reinterpret_cast<yuka::MainWindow*>(this);
+		const auto window = reinterpret_cast<yuka::Window*>(this);
 
-		window->style = WS_OVERLAPPEDWINDOW;
+		if (strcmp(window->className, "YukaWindowClass") == 0)
+		{
+			window->style = WS_OVERLAPPEDWINDOW;
+		}
 
-		return YMainWindow_Create(window);
+		return YWindow_Create(window);
 	}
 
 private:
 	void __thiscall CalculateViewport(int width, int height)
 	{
-		const auto window = reinterpret_cast<yuka::MainWindow*>(this);
+		const auto window = reinterpret_cast<yuka::Window*>(this);
 
 		const int resW = window->surfaces[0].width;
 		const int resH = window->surfaces[0].height;
@@ -471,7 +510,7 @@ private:
 
 	void __thiscall PaintBlackBars(HDC dstDc)
 	{
-		const auto window = reinterpret_cast<yuka::MainWindow*>(this);
+		const auto window = reinterpret_cast<yuka::Window*>(this);
 
 		const auto blackBrush = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 
@@ -520,45 +559,70 @@ void uif::features::yuka_engine_fixes::initialize()
 	get_address(0x00406140, RestoreDisplayMode, "restore_display_mode");
 	get_address(0x00428210, LoadCursors, "load_cursors");
 
-	get_address(0x00422F90, YMainWindow_RefreshSynced, "ymainwindow_refresh_synced");
-	get_address(0x00417A20, YMainWindow_SetWindowMode, "ymainwindow_set_window_mode");
-	get_address(0x00417950, YMainWindow_AdjustWindowRect, "ymainwindow_adjust_window_rect");
 	get_address(0x0040E990, YMainWindow_WindowProc, "ymainwindow_window_proc");
-	get_address(0x00417E40, YMainWindow_Repaint, "ymainwindow_repaint");
-	get_address(0x00417770, YMainWindow_Create, "ymainwindow_create");
-	get_address(0x0040DDE0, YSync_WaitForRepaint, "ysync_wait_for_repaint");
+	get_address(0x00422F90, YWindow_RefreshSynced, "ywindow_refresh_synced");
+	get_address(0x00417A20, YWindow_SetWindowMode, "ywindow_set_window_mode");
+	get_address(0x00417950, YWindow_AdjustWindowRect, "ywindow_adjust_window_rect");
+	get_address(0x00417770, YWindow_Create, "ywindow_create");
+	get_address(0x00417E40, YWindow_Repaint, "ywindow_repaint");
+	get_address(0x0040DDE0, YRenderThread_WaitForRepaint, "yrenderthread_wait_for_repaint");
 	get_address(0x00410E70, YGraphicsContext_Invalidate, "ygraphics_context_invalidate");
+	get_address(0x00410D40, YGraphicsContext_FindLayer, "ygraphics_context_find_layer");
+	get_address(0x00410BF0, YGraphicsContext_CreateLayer, "ygraphics_context_create_layer");
+	get_address(0x00414550, YGraphicsContext_DestroyLayer, "ygraphics_context_destroy_layer");
 	get_address(0x00403960, YFontInfo_MeasureText, "yfont_info_measure_text");
 	get_address(0x004080F0, YSprite_CreateFromChar, "ysprite_create_from_char");
+	get_address(0x00408170, YSprite_CreateFromString, "ysprite_create_from_string");
+	get_address(0x00413C20, YLayer_SetVisible, "ylayer_set_visible");
 	get_address(0x00410FA0, YLayer_AddSprite, "ylayer_add_sprite");
 	get_address(0x00414770, YLayer_AppendCharacterSprite, "ylayer_append_character_sprite");
 	get_address(0x00413390, YLayer_AppendCharacterSpriteInternal, "ylayer_append_character_sprite_internal");
+	get_address(0x00413880, YLayer_AddStringSprite, "ylayer_add_string_sprite");
+	get_address(0x00413A50, YLayer_DestroyAllSprites, "ylayer_destroy_all_sprites");
+	get_address(0x00413B20, YLayer_DestroySprite, "ylayer_destroy_sprite");
 
+	get_address(0x00439A20, f_TextBoxSet, "f_text_box_set");
+	get_address(0x00431B30, f_TextBoxDelete, "f_text_box_delete");
+	get_address(0x00431B50, f_TextBoxStringGet, "f_text_box_string_get");
+	get_address(0x00431C00, f_TextBoxStringSet, "f_text_box_string_set");
+	get_address(0x00439B00, f_GraphicLoad, "f_graphic_load");
+	get_address(0x0043A0C0, f_GraphicLoadHide, "f_graphic_load_hide");
 	get_address(0x00441540, f_KeyWait, "f_key_wait");
+	get_address(0x00441AB0, f_StrOut, "f_str_out");
+	get_address(0x00441D30, f_StrOutNW, "f_str_out_nw");
+	get_address(0x00441D70, f_StrOutNWC, "f_str_out_nwc");
 	get_address(0x0043F600, f_PF, "f_pf");
 	get_address(0x00430670, f_LF, "f_lf");
 
 	get_address(0x004C32C8, GlobalFontTable, "global_font_table");
 	get_address(0x0054D608, GlobalMainWindow, "global_main_window");
-	get_address(0x004C3F0C, GlobalSync, "global_sync");
+	get_address(0x004C3F0C, GlobalRenderThread, "global_render_thread");
 	get_address(0x0054ED18, GameGlobals, "game_globals");
 
 	hooks::hook_function(this, ProcessText, ProcessTextHook, "yuka::ProcessText");
 	hooks::hook_function(this, YLayer_AppendCharacterSpriteInternal, &YLayer::AppendCharacterSpriteInternal, "yuka::Layer::AppendCharacterSpriteInternal");
-	hooks::hook_function(this, YMainWindow_SetWindowMode, &YMainWindow::SetWindowMode, "yuka::MainWindow::SetWindowMode");
-	hooks::hook_function(this, YMainWindow_WindowProc, &YMainWindow::WindowProc, "yuka::MainWindow::WindowProc");
-	hooks::hook_function(this, YMainWindow_Repaint, &YMainWindow::Repaint, "yuka::MainWindow::Repaint");
-	hooks::hook_function(this, YMainWindow_Create, &YMainWindow::Create, "yuka::MainWindow::Create");
+	hooks::hook_function(this, YMainWindow_WindowProc, &YWindow::MainWindowProc, "yuka::MainWindow::WindowProc");
+	hooks::hook_function(this, YWindow_SetWindowMode, &YWindow::SetWindowMode, "yuka::Window::SetWindowMode");
+	hooks::hook_function(this, YWindow_Repaint, &YWindow::Repaint, "yuka::Window::Repaint");
+	hooks::hook_function(this, YWindow_Create, &YWindow::Create, "yuka::Window::Create");
+	hooks::hook_function(this, f_TextBoxSet, f_TextBoxSetHook, "yuka::f_TextBoxSet");
+	hooks::hook_function(this, f_TextBoxDelete, f_TextBoxDeleteHook, "yuka::f_TextBoxDelete");
+	hooks::hook_function(this, f_TextBoxStringGet, f_TextBoxStringGetHook, "yuka::f_TextBoxStringGet");
+	hooks::hook_function(this, f_TextBoxStringSet, f_TextBoxStringSetHook, "yuka::f_TextBoxStringSet");
 }
 
 void uif::features::yuka_engine_fixes::finalize()
 {
 	hooks::unhook_function(this, ProcessText, ProcessTextHook, "yuka::ProcessText");
 	hooks::unhook_function(this, YLayer_AppendCharacterSpriteInternal, &YLayer::AppendCharacterSpriteInternal, "yuka::Layer::AppendCharacterSpriteInternal");
-	hooks::unhook_function(this, YMainWindow_SetWindowMode, &YMainWindow::SetWindowMode, "yuka::MainWindow::SetWindowMode");
-	hooks::unhook_function(this, YMainWindow_WindowProc, &YMainWindow::WindowProc, "yuka::MainWindow::WindowProc");
-	hooks::unhook_function(this, YMainWindow_Repaint, &YMainWindow::Repaint, "yuka::MainWindow::Repaint");
-	hooks::unhook_function(this, YMainWindow_Create, &YMainWindow::Create, "yuka::MainWindow::Create");
+	hooks::unhook_function(this, YMainWindow_WindowProc, &YWindow::MainWindowProc, "yuka::MainWindow::WindowProc");
+	hooks::unhook_function(this, YWindow_SetWindowMode, &YWindow::SetWindowMode, "yuka::Window::SetWindowMode");
+	hooks::unhook_function(this, YWindow_Repaint, &YWindow::Repaint, "yuka::Window::Repaint");
+	hooks::unhook_function(this, YWindow_Create, &YWindow::Create, "yuka::Window::Create");
+	hooks::unhook_function(this, f_TextBoxSet, f_TextBoxSetHook, "yuka::f_TextBoxSet");
+	hooks::unhook_function(this, f_TextBoxDelete, f_TextBoxDeleteHook, "yuka::f_TextBoxDelete");
+	hooks::unhook_function(this, f_TextBoxStringGet, f_TextBoxStringGetHook, "yuka::f_TextBoxStringGet");
+	hooks::unhook_function(this, f_TextBoxStringSet, f_TextBoxStringSetHook, "yuka::f_TextBoxStringSet");
 }
 
 template <typename T>

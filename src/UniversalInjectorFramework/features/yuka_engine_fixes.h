@@ -9,8 +9,8 @@ namespace yuka
 	struct Sprite;
 	struct AnimationFrame;
 
-	struct MainWindow;
-	struct Sync;
+	struct Window;
+	struct RenderThread;
 
 	struct ScriptContext;
 	struct ScriptFrame;
@@ -77,19 +77,19 @@ namespace yuka
 
 	struct Sprite
 	{
-		bool field_0;
+		bool isVisible;
 		int x;
 		int y;
 		int w;
 		int h;
-		RECT field_14;
-		int field_24;
+		RECT currentFrameSourceRect;
+		int currentFrameDuration;
 		Surface* surface;
-		int field_2C;
+		int currentFrameType;
 		int type;
-		void* field_34;
-		int field_38;
-		bool field_3C;
+		Layer* layer;
+		int spriteId;
+		bool isValid;
 		int field_40;
 		char field_44;
 		char character;
@@ -97,9 +97,9 @@ namespace yuka
 		char* text;
 		int fontId;
 		COLORREF textColor;
-		int field_54;
-		int field_58;
-		int field_5C;
+		int fontEffect;
+		int shadowColor;
+		int borderColor;
 		int field_60;
 		int field_64;
 		int field_68;
@@ -109,8 +109,8 @@ namespace yuka
 		int field_78;
 		int field_7C;
 		int animationId;
-		int field_84;
-		void* animationFrames;
+		int currentAnimationFrame;
+		AnimationFrame* animationFrames;
 		int animationFrameCount;
 		int field_90;
 		int field_94;
@@ -140,45 +140,102 @@ namespace yuka
 		Surface surface;
 		Layer* prev;
 		Layer* next;
-		void* layerId;
-		int field_64[27];
-		double spriteOffsetX;
-		double spriteOffsetY;
+		int layerId;
+		Surface surface2;
+		char field_BC;
+		int field_C0;
+		int field_C4;
+		int field_C8;
+		int field_CC;
+		double offsetX;
+		double offsetY;
 		int field_E0;
 		int field_E4;
-		char field_E8;
+		char isVisible;
 		int fontId;
-		int field_F0;
-		int field_F4;
-		int field_F8;
-		int field_FC;
+		int textColor;
+		int fontEffect;
+		int shadowColor;
+		int borderColor;
 		int cursorX;
 		int cursorY;
-		int cursorX2;
-		int cursorY2;
-		int defaultCursorX;
-		int defaultCursorY;
-		int cursorXLimit;
-		int cursorYLimit;
-		int field_120;
-		int field_124;
-		int field_128;
+		int cursorWithoutAutoWrapX;
+		int cursorWithoutAutoWrapY;
+		RECT textArea;
+		int keyWaitIconOffsetX;
+		int keyWaitIconOffsetY;
+		int keyWaitIconPositioning;
 		int field_12C;
 		Sprite* sprites[1000];
 		int spriteCount;
 		bool waitForNextPage;
 		GraphicsContext* graphics;
-		int field_10DC[17];
+		int scrollMode;
+		double field_10E0;
+		double field_10E8;
+		int field_10F0;
+		int field_10F4;
+		double transparency;
+		double transparencyStep;
+		double targetTransparency;
+		int field_1110;
+		int field_1114;
+		int field_1118;
+		int field_111C;
 		char field_1120;
 		char isFlushed_;
-		int field_1124[97];
-		char field_12A8;
-		char field_12A9;
-		int field_12AC;
-		int field_12B0;
-		char field_12B4;
-		char field_12B5;
-		char field_12B6;
+		char isScaled;
+		int field_1124;
+		double scaleX;
+		double scaleY;
+		int scaleCenterX;
+		int scaleCenterY;
+		char field_1140;
+		int field_1144;
+		double scaleStepX;
+		double scaleStepY;
+		double targetScaleX;
+		double targetScaleY;
+		Surface field_1168;
+		int field_11C0;
+		int field_11C4;
+		int field_11C8;
+		int field_11CC;
+		int field_11D0;
+		int field_11D4;
+		int field_11D8;
+		int field_11DC;
+		double rotation;
+		int rotationCenterX;
+		int rotationCenterY;
+		int rotationMode;
+		int field_11F4;
+		double rotationStep;
+		int rotationTarget;
+		Surface field_1204;
+		int field_125C;
+		int field_1260;
+		int field_1264;
+		int field_1268;
+		int field_126C;
+		bool isRasterScrollActive;
+		int field_1274;
+		int field_1278;
+		int field_127C;
+		double field_1280;
+		double field_1288;
+		double field_1290;
+		int field_1298;
+		int field_129C;
+		int field_12A0;
+		int field_12A4;
+		char doNotSaveGraphicAttributes;
+		char textNoWait;
+		int addColor;
+		int subColor;
+		char sepia;
+		char monochrome;
+		char inverted;
 		int field_12B8[75];
 		int field_13E4;
 	};
@@ -198,48 +255,44 @@ namespace yuka
 
 	// Script
 
-	struct YksFileInfo
+	struct KeyBinding
 	{
-		int field_0;
-		int field_4;
-		int field_8;
-		int field_C;
-		int field_10;
-		int field_14;
-		int field_18;
-		int field_1C;
-		int field_20;
-		int field_24;
-		int field_28;
+		int keyCodes[16];
+		int count;
+	};
+
+	struct AreaDefinition
+	{
+		int isEnabled;
+		int layerId;
+		int x1;
+		int y1;
+		int x2;
+		int y2;
+		int hoverSpriteSourceLayerId;
+		int hoverSpriteX;
+		int hoverSpriteY;
+		int hoverSpriteAnimationId1;
+		int hoverSpriteAnimationId2;
 		int field_2C;
 		int field_30;
-		int field_34;
-		int field_38;
-		int field_3C;
+		int hoverSoundId;
+		int clickSoundId;
+		int soundId3;
 		int field_40;
-		const char* fileName;
-		int field_48;
-		int field_4C;
-		int field_50;
-		int field_54;
-		int field_58;
-		int field_5C;
-		int field_60;
-		int field_64;
-		int field_68;
-		int field_6C;
-		int field_70;
-		int field_74;
-		int field_78;
-		int field_7C;
-		int field_80;
-		int field_84;
-		int field_88;
-		int field_8C;
-		char field_90;
-		YksFileInfo* prev;
-		YksFileInfo* next;
 	};
+
+	struct EventHandler
+	{
+		AreaDefinition mouseArea;
+		const char* fileName;
+		int id;
+		KeyBinding keyBinding;
+		char field_90;
+		EventHandler* prev;
+		EventHandler* next;
+	};
+
 
 	struct struc_31
 	{
@@ -253,7 +306,7 @@ namespace yuka
 		int field_18;
 	};
 
-	struct struc_20
+	struct HistoryEntry
 	{
 		struc_31* field_0;
 		int field_4;
@@ -271,8 +324,8 @@ namespace yuka
 		ScriptFrame* rootScript;
 		ScriptFrame* currentScript;
 		Layer* messageLayer;
-		int field_C;
-		int field_10;
+		int messageLayerId;
+		int nameLayerId;
 		GraphicsContext* graphics;
 		int field_18;
 		void* field_1C;
@@ -290,12 +343,13 @@ namespace yuka
 		int field_4C;
 		int field_50;
 		int field_54;
-		int field_58;
-		int field_5C;
-		int field_60;
-		int field_64;
-		char field_68;
-		int field_6C[15];
+		int cdPlayMode;
+		bool isHistoryTextColorText_;
+		int historyTextColor1;
+		int historyTextColor2;
+		char isHistoryTextLayerIdValid;
+		int historyTextLayerId;
+		int historySoundGroupChannels[14];
 		int field_A8;
 		int field_AC;
 		int field_B0;
@@ -314,37 +368,99 @@ namespace yuka
 		int field_E4;
 		int field_E8;
 		int field_EC;
-		int field_F0;
-		int field_F4;
-		int field_F8;
-		int field_FC;
-		int field_100;
+		int historySoundGroupChannelCount;
+		int historySoundIconSourceLayerId;
+		char isHistorySoundIconSet;
+		int historySoundIconInfo1;
+		int historySoundIconInfo2;
 		int flags[65536];
 		void* strings[65536];
 		char* tempGlobalString;
 		char* generalPurposeString;
 		char* indexName;
-		char field_80110;
-		char field_80111;
+		char isSkipping;
+		bool wasInstructionExecutedBefore;
+		char alreadyNoWaitMode;
 		HANDLE scriptSync;
 		int selectionMode;
 		int field_8011C;
 		int field_80120;
-		int field_80124;
+		int selectFunction;
 		int mouseSelectFunction;
-		int field_8012C;
+		int keyWaitFlags;
 		char field_80130;
-		int field_80134;
+		int keyWaitIconAnimationId;
 		char field_80138;
 		int field_8013C;
-		int field_80140;
+		int historyCount;
 		std_string currentVoiceClipName;
-		struc_20 field_80160[1000];
-		int field_88E00[34];
-		int field_88E88;
-		int field_88E8C[237];
-		YksFileInfo* field_89240;
+		HistoryEntry history[1000];
+		AreaDefinition areaHistoryMode;
+		AreaDefinition areaSkip;
+		AreaDefinition areaAlreadySkip;
+		AreaDefinition areaAutoMode;
+		AreaDefinition areaAutoModeExecute;
+		AreaDefinition areaWindowErase;
+		AreaDefinition areaHistoryNext;
+		AreaDefinition areaHistoryNextPage;
+		AreaDefinition areaHistoryPrev;
+		AreaDefinition areaHistoryPrevPage;
+		AreaDefinition areaHistoryLast;
+		AreaDefinition areaHistoryHead;
+		AreaDefinition areaHistoryExit;
+		AreaDefinition areaHistoryMouseR;
+		AreaDefinition areaHistoryScrollbarH;
+		AreaDefinition areaHistoryScrollbarV;
+		EventHandler* eventHandlers;
 		const char* field_89244;
+		int field_89248;
+		bool skipNextTransition;
+		char isKeyWaitIconEnable;
+		int historyEntriesPerPage;
+		int keyWaitShowLayerIds[16];
+		int keyWaitShowLayerIdCount;
+		int keyWaitHideLayerIds[16];
+		int keyWaitHideLayerIdCount;
+		int field_892DC[64];
+		int field_893DC;
+		int field_893E0;
+		int field_893E4;
+		int field_893E8;
+		int field_893EC;
+		int field_893F0;
+		int field_893F4;
+		int field_893F8;
+		int field_893FC;
+		int field_89400;
+		int field_89404;
+		int field_89408;
+		int field_8940C;
+		int field_89410;
+		int keyWaitIconAnimationId2;
+		int field_89418;
+		int field_8941C;
+		int field_89420;
+		int field_89424;
+		int field_89428;
+		int field_8942C;
+	};
+
+	struct Thread
+	{
+		HANDLE handle;
+		_RTL_CRITICAL_SECTION criticalSection;
+		char terminate;
+		void* entrypoint;
+	};
+
+	struct RenderThread
+	{
+		Thread thread;
+		int field_24;
+		HANDLE setEvent;
+		HANDLE waitEvent;
+		int frameCount;
+		int frameDelay;
 	};
 
 	enum DataElementType
@@ -449,12 +565,12 @@ namespace yuka
 	struct MainWindow_vtable
 	{
 		int dtor;
-		int(__thiscall* WindowProc)(MainWindow* _this, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+		int(__thiscall* WindowProc)(Window* _this, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 		int Create;
 		int Destroy;
 	};
 
-	struct MainWindow
+	struct Window
 	{
 		MainWindow_vtable* vtable;
 		HWND hWnd;
@@ -472,14 +588,14 @@ namespace yuka
 		const char* className;
 		const char* caption;
 		char field_3C;
-		char field_3D;
+		bool isDrawingSuspended;
 		HCURSOR cursor;
 		int field_44;
-		int wndProc;
-		void* editWindow;
+		WNDPROC baseClassWindowProc;
+		Window* editWindow;
 		char isCursorHidden;
 		Surface surfaces[3];
-		GraphicsContext* graphicsContext;
+		GraphicsContext* graphics;
 		int gameExitHandlers[16];
 		int gameExitHandlerCount;
 		int field_1A4;
@@ -506,32 +622,13 @@ namespace yuka
 		int field_1F4;
 		ScriptContext* scriptContext;
 	};
-	
-	struct Sync
-	{
-		int field_0;
-		_RTL_CRITICAL_SECTION criticalSection;
-		int field_1C;
-		int field_20;
-		int field_24;
-		HANDLE setEvent;
-		HANDLE waitEvent;
-		int field_30;
-		int timeout;
-	};
-
-	struct KeyBinding
-	{
-		int keyCodes[16];
-		int count;
-	};
 
 	struct Game
 	{
 		HINSTANCE hInstance;
 		HWND applicationWindowHandle;
 		int hMutex;
-		char isFullscreen;
+		bool isFullscreen;
 		__declspec(align(4)) char isSavingEnabled;
 		char isLoadingEnabled;
 		char field_12;

@@ -280,6 +280,218 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 	return IsDBCSLeadByteEx(0, *text) ? 2 : 1;
 }
 
+#pragma region TextBox
+
+constexpr int textBoxLayerId = 998;
+
+bool textBoxActive = false;
+int textBoxX{};
+int textBoxY{};
+int textBoxW{};
+int textBoxH{};
+std::string textBoxContents{};
+HFONT textBoxFont{};
+
+void DeleteTextBox()
+{
+	CriticalLock lock(GlobalRenderThread->thread.criticalSection);
+
+	if (!textBoxActive) return;
+
+	textBoxContents.clear();
+	textBoxActive = false;
+
+	YGraphicsContext_DestroyLayer(GlobalMainWindow->graphics, textBoxLayerId);
+
+	DeleteObject(textBoxFont);
+	textBoxFont = nullptr;
+}
+
+void CreateTextBox(yuka::ScriptContext* ctx, int x, int y, int w, int h, int textColor, int fontId, int fontEffect, int shadowColor, int borderColor)
+{
+	CriticalLock lock(GlobalRenderThread->thread.criticalSection);
+
+	DeleteTextBox();
+
+	textBoxActive = true;
+	textBoxX = x;
+	textBoxY = y;
+	textBoxW = w;
+	textBoxH = h;
+
+	int zero = 0;
+	const void* params[16] = { &textBoxLayerId, "ykg\\system\\damy.ykg", &zero, &zero };
+	f_GraphicLoad(ctx, 4, params);
+
+	const auto layer = YGraphicsContext_FindLayer(GlobalMainWindow->graphics, textBoxLayerId);
+	if (layer == nullptr) return;
+
+	SetRect(&layer->textArea, textBoxX, textBoxY, textBoxX + textBoxW, textBoxY + textBoxH);
+	layer->cursorX = layer->cursorWithoutAutoWrapX = layer->textArea.left;
+	layer->cursorY = layer->cursorWithoutAutoWrapY = layer->textArea.top;
+	layer->fontId = fontId >= 0 ? fontId : ctx->messageLayer->fontId;
+	layer->fontEffect = fontEffect >= 0 ? fontEffect : ctx->messageLayer->fontEffect;
+	layer->textColor = textColor >= 0 ? textColor : ctx->messageLayer->textColor;
+	layer->shadowColor = borderColor >= 0 ? borderColor : ctx->messageLayer->shadowColor;
+	layer->borderColor = shadowColor >= 0 ? shadowColor : ctx->messageLayer->borderColor;
+}
+
+bool TryAppendTextBoxCharSprite(int ch, bool force = false)
+{
+	CriticalLock lock(GlobalRenderThread->thread.criticalSection);
+
+	if (!textBoxActive) return false;
+	if (ch < ' ' || ch > '~') return false;
+	const char text[] = { static_cast<char>(ch), 0 };
+
+	const auto layer = YGraphicsContext_FindLayer(GlobalMainWindow->graphics, textBoxLayerId);
+	if (layer == nullptr) return false;
+
+	SIZE size;
+	YFontInfo_MeasureText(&GlobalFontTable[layer->fontId], text, &size);
+
+	if (!force && layer->cursorX + size.cx >= layer->textArea.right) return false;
+
+	auto* sprite = make_new<yuka::Sprite>();
+	YSprite_CreateFromChar(sprite, text, layer->cursorX, layer->cursorY, layer->fontId, layer->textColor, layer->fontEffect, layer->shadowColor, layer->borderColor);
+	sprite->isVisible = true;
+	YLayer_AddSprite(layer, sprite);
+
+	layer->cursorX += size.cx;
+
+	return true;
+}
+
+bool TryRemoveLastTextBoxCharSprite()
+{
+	CriticalLock lock(GlobalRenderThread->thread.criticalSection);
+
+	if (!textBoxActive) return false;
+
+	const auto layer = YGraphicsContext_FindLayer(GlobalMainWindow->graphics, textBoxLayerId);
+	if (layer == nullptr) return false;
+
+	if (layer->spriteCount == 0) return false;
+
+	const auto sprite = layer->sprites[layer->spriteCount - 1];
+
+	SIZE size;
+	YFontInfo_MeasureText(&GlobalFontTable[layer->fontId], &sprite->character, &size);
+	
+	layer->cursorX -= size.cx;
+	YLayer_DestroySprite(layer, sprite);
+
+	return true;
+}
+
+void ReplaceTextBoxText(const char* ch)
+{
+	if (!textBoxActive) return;
+
+	const auto layer = YGraphicsContext_FindLayer(GlobalMainWindow->graphics, textBoxLayerId);
+	if (layer == nullptr) return;
+
+	textBoxContents.clear();
+	YLayer_DestroyAllSprites(layer);
+	layer->cursorX = layer->cursorWithoutAutoWrapX = layer->textArea.left;
+	layer->cursorY = layer->cursorWithoutAutoWrapY = layer->textArea.top;
+
+	while (*ch)
+	{
+		TryAppendTextBoxCharSprite(*ch++, true);
+	}
+}
+
+LRESULT __cdecl TextBoxWindowProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	if (!textBoxActive) return false;
+
+	switch (msg)
+	{
+	case WM_CHAR:
+		if (TryAppendTextBoxCharSprite(wParam))
+		{
+			const char text[] = { static_cast<char>(wParam), 0 };
+			textBoxContents.append(text);
+		}
+		else if (wParam != 8 && wParam != 10)
+		{
+			PlaySoundA("DeviceConnect", nullptr, SND_ALIAS | SND_ASYNC);
+		}
+		return true;
+
+	case WM_KEYDOWN:
+		if (wParam == VK_BACK)
+		{
+			if (TryRemoveLastTextBoxCharSprite())
+			{
+				textBoxContents.resize(textBoxContents.size() - 1);
+			}
+			else
+			{
+				PlaySoundA("DeviceConnect", nullptr, SND_ALIAS | SND_ASYNC);
+			}
+		}
+	}
+
+	return false;
+}
+
+static yuka::ScriptValue* __cdecl f_TextBoxSetHook(yuka::ScriptContext* ctx, int argc, void** argv)
+{
+	if (argc < 4)
+	{
+		DeleteTextBox();
+	}
+	else
+	{
+		const int x = *static_cast<int*>(argv[0]);
+		const int y = *static_cast<int*>(argv[1]);
+		const int w = *static_cast<int*>(argv[2]);
+		const int h = *static_cast<int*>(argv[3]);
+		const int textColor = argc >= 5 ? *static_cast<int*>(argv[4]) : -1;
+		const int fontId = argc >= 6 ? *static_cast<int*>(argv[5]) : -1;
+		const int fontEffect = argc >= 7 ? *static_cast<int*>(argv[6]) : -1;
+		const int shadowColor = argc >= 8 ? *static_cast<int*>(argv[7]) : -1;
+		const int borderColor = argc >= 9 ? *static_cast<int*>(argv[8]) : -1;
+
+		CreateTextBox(ctx, x, y, w, h, textColor, fontId, fontEffect, shadowColor, borderColor);
+	}
+
+	return nullptr;
+}
+
+static yuka::ScriptValue* __cdecl f_TextBoxDeleteHook(yuka::ScriptContext* ctx, int argc, void** argv)
+{
+	DeleteTextBox();
+	return nullptr;
+}
+
+static yuka::ScriptValue* __cdecl f_TextBoxStringGetHook(yuka::ScriptContext* ctx, int argc, void** argv)
+{
+	const auto result = make_new<yuka::ScriptValue>();
+	const auto length = textBoxContents.size();
+	const auto string = static_cast<char*>(operator_new(length + 1));
+
+	strcpy_s(string, length + 1, textBoxContents.c_str());
+
+	result->type = yuka::VT_Str;
+	result->stringValue = string;
+
+	return result;
+}
+
+static yuka::ScriptValue* __cdecl f_TextBoxStringSetHook(yuka::ScriptContext* ctx, int argc, void** argv)
+{
+	if (argc < 1) return nullptr;
+
+	ReplaceTextBoxText(static_cast<char*>(argv[0]));
+
+	return nullptr;
+}
+
+#pragma endregion TextBox
+
 // dummy class is necessary because C++ won't allow me to declare the function as __thiscall otherwise
 class YLayer
 {

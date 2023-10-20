@@ -617,7 +617,56 @@ public:
 		switch (msg)
 		{
 		case WM_SIZING:
-			return FALSE;
+		{
+			const auto rect = reinterpret_cast<LPRECT>(lParam);
+
+			constexpr int minClientWidth = 800;
+			constexpr int minClientHeight = 600;
+
+			RECT adjustRect;
+			SetRectEmpty(&adjustRect);
+			AdjustWindowRect(&adjustRect, GetWindowLongA(hWnd, GWL_STYLE), false);
+
+			const int adjustWidth = adjustRect.right - adjustRect.left;
+			const int adjustHeight = adjustRect.bottom - adjustRect.top;
+
+			const int clientWidth = rect->right - rect->left - adjustWidth;
+			const int clientHeight = rect->bottom - rect->top - adjustHeight;
+
+			if (clientWidth < minClientWidth)
+			{
+				switch (wParam)
+				{
+				case WMSZ_LEFT:
+				case WMSZ_BOTTOMLEFT:
+				case WMSZ_TOPLEFT:
+					rect->left = rect->right - minClientWidth - adjustWidth;
+					break;
+
+				default:
+					rect->right = rect->left + minClientWidth + adjustWidth;
+					break;
+				}
+			}
+
+			if (clientHeight < minClientHeight)
+			{
+				switch (wParam)
+				{
+				case WMSZ_TOP:
+				case WMSZ_TOPLEFT:
+				case WMSZ_TOPRIGHT:
+					rect->top = rect->bottom - minClientHeight - adjustHeight;
+					break;
+
+				default:
+					rect->bottom = rect->top + minClientHeight + adjustHeight;
+					break;
+				}
+			}
+			break;
+		}
+
 
 		case WM_SIZE: {
 			GameGlobals->isWindowResized = true;

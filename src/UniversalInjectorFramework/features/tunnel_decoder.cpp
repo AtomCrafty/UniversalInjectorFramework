@@ -14,7 +14,27 @@ BOOL __stdcall TextOutAHook(HDC hdc, int x, int y, LPCSTR lpString, int c)
 	const auto& decoder = uif::injector::instance().feature<uif::features::tunnel_decoder>();
 	const auto& decoded = encoding::decode_shiftjis_tunnel(lpString, c, decoder.mapping);
 
-	return TextOutW(hdc, x, y, decoded.c_str(), static_cast<int>(decoded.length()));
+	constexpr int offset = 2;
+	/*
+	SetBkMode(hdc, TRANSPARENT);
+
+	SIZE size;
+	GetTextExtentPoint32W(hdc, decoded.c_str(), static_cast<int>(decoded.length()), &size);
+
+	int width = 4;
+	RECT rect{ x + offset, y, x + size.cx + offset - 1, y + size.cy - 1 };
+	do {
+		FrameRect(hdc, &rect, static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
+		rect.left++;
+		rect.top++;
+		rect.right--;
+		rect.bottom--;
+	} while (width-- > 0);
+	*/
+
+	// offset everything the right in order to avoid the clipping issue with the j character
+	// the glyph extends further left than the current cursor position, which the engine does not account for
+	return TextOutW(hdc, x + offset, y, decoded.c_str(), static_cast<int>(decoded.length()));
 }
 
 int __stdcall MultiByteToWideCharHook(UINT CodePage, DWORD dwFlags, LPCCH lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar)

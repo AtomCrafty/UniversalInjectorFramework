@@ -83,7 +83,7 @@ public:
 static int measure_first_char(const char* text, int fontId)
 {
 	char ch[] = { *text, 0, 0 };
-	if (IsDBCSLeadByteEx(0, *text)) ch[1] = text[1];
+	if (IsDBCSLeadByteEx(932, *text)) ch[1] = text[1];
 	SIZE size;
 	YFontInfo_MeasureText(&GlobalFontTable[fontId], ch, &size);
 	return size.cx;
@@ -255,7 +255,7 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 			break;
 
 		width += measure_first_char(&text[i], layer->fontId);
-		if (IsDBCSLeadByteEx(0, text[i])) i++;
+		if (IsDBCSLeadByteEx(932, text[i])) i++;
 	}
 
 	// emit a line break if the word would overflow the line
@@ -277,7 +277,7 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 		return 1;
 
 	YLayer_AppendCharacterSprite(layer, text);
-	return IsDBCSLeadByteEx(0, *text) ? 2 : 1;
+	return IsDBCSLeadByteEx(932, *text) ? 2 : 1;
 }
 
 #pragma region TextBox

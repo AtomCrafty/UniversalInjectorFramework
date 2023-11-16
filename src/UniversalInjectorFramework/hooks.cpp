@@ -34,6 +34,7 @@ namespace uif::hooks
 		HMODULE targetModule;
 		bool success;
 		bool found;
+		bool foundAny;
 	};
 
 	BOOL CALLBACK hook_import_enum_proc(PVOID pContext, DWORD nOrdinal, LPCSTR pszFunc, PVOID* ppvFunc)
@@ -42,6 +43,8 @@ namespace uif::hooks
 			return true;
 
 		auto* info = static_cast<hook_import_info*>(pContext);
+
+		info->foundAny = true;
 
 		if(!strcmp(pszFunc, info->importName))
 		{
@@ -109,8 +112,17 @@ namespace uif::hooks
 			DetourEnumerateImportsEx(module, &info, nullptr, hook_import_enum_proc);
 		}
 
+		if(!info.foundAny)
+		{
+			std::cout << *feature << red(" Unable to enumerate import address table\n");
+			std::cout << *feature << red(" This likely means the module had some sort of tamper protection applied to it\n");
+		}
+
 		if(!info.found)
+		{
 			std::cout << *feature << black(" Unable to hook import ") << black(importName) << black(" because it does not exist\n");
+		}
+
 		return info.success;
 	}
 

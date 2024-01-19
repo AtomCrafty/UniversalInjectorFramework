@@ -122,6 +122,9 @@
     <ClInclude Include="proxies\version.h">
       <Filter>Header Files\proxies</Filter>
     </ClInclude>
+    <ClInclude Include="features\text_processor.h">
+      <Filter>Header Files\features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -213,6 +216,12 @@
     </ClCompile>
     <ClCompile Include="proxies\version.cpp">
       <Filter>Source Files\proxies</Filter>
+    </ClCompile>
+    <ClCompile Include="features\text_processor.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="features\text_processor.hooks.cpp">
+      <Filter>Source Files\features</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -243,6 +243,7 @@
     <ClInclude Include="features\memory_patcher.h" />
     <ClInclude Include="features\play_timer.h" />
     <ClInclude Include="features\start_suspended.h" />
+    <ClInclude Include="features\text_processor.h" />
     <ClInclude Include="features\tunnel_decoder.h" />
     <ClInclude Include="features\window_manager.h" />
     <ClInclude Include="proxies\d3d11.h" />
@@ -277,6 +278,8 @@
     <ClCompile Include="features\memory_patcher.cpp" />
     <ClCompile Include="features\play_timer.cpp" />
     <ClCompile Include="features\start_suspended.cpp" />
+    <ClCompile Include="features\text_processor.cpp" />
+    <ClCompile Include="features\text_processor.hooks.cpp" />
     <ClCompile Include="features\tunnel_decoder.cpp" />
     <ClCompile Include="features\window_manager.cpp" />
     <ClCompile Include="proxies\d3d8.cpp" />

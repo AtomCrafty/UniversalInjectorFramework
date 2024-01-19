@@ -6,6 +6,7 @@
 #include "utils.h"
 
 #include "features/allocate_console.h"
+#include "features/text_processor.h"
 #include "features/start_suspended.h"
 #include "features/character_substitution.h"
 #include "features/custom_feature.h"
@@ -120,6 +121,7 @@ namespace uif
 		libraries::load();
 
 		initialize_feature<features::start_suspended>();
+		initialize_feature<features::text_processor>();
 		initialize_feature<features::character_substitution>();
 		initialize_feature<features::tunnel_decoder>();
 		initialize_feature<features::file_monitor>();

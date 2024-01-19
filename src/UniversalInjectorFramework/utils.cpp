@@ -156,7 +156,7 @@ namespace uif::utils
 		std::wstring wide;
 		if (decoder && decoder->is_enabled())
 		{
-			wide = decoder->decode(text.c_str(), static_cast<int>(text.length()));
+			wide = encoding::decode_shiftjis_tunnel(text.c_str(), static_cast<int>(text.length()), decoder->mapping);
 		}
 		else
 		{

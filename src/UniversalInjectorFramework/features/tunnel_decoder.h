@@ -10,8 +10,6 @@ namespace uif::features {
 		void initialize() override;
 		void finalize() override;
 
-		std::wstring decode(const char* text, int count) const;
-
 		std::wstring mapping{};
 	};
 }

@@ -38,7 +38,7 @@ static LRESULT WINAPI DefWindowProcWHook(HWND hWnd, UINT Msg, WPARAM wParam, LPA
 	}
 
 	default:
-		return DefWindowProcA(hWnd, Msg, wParam, lParam);
+		return DefWindowProcW(hWnd, Msg, wParam, lParam);
 	}
 }
 

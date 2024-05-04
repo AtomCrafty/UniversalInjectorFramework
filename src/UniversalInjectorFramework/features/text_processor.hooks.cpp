@@ -555,7 +555,7 @@ namespace uif::features
 			switch (Msg)
 			{
 			case WM_NCCREATE:
-				if (text_processor().is_api_enabled(api::NCCREATE)) {
+				if (text_processor().is_api_enabled(api::NCCREATE) && lParam) {
 					CREATESTRUCTW createStruct{};
 					memcpy(&createStruct, reinterpret_cast<LPCREATESTRUCTW>(lParam), sizeof(CREATESTRUCTW));
 
@@ -568,12 +568,14 @@ namespace uif::features
 
 					return wideHandler(hWnd, Msg, wParam, reinterpret_cast<LPARAM>(&createStruct));
 				}
+				break;
 
 			case WM_SETTEXT:
-				if (text_processor().is_api_enabled(api::SETTEXT)) {
+				if (text_processor().is_api_enabled(api::SETTEXT) && lParam) {
 					const auto processed = text_processor().process(reinterpret_cast<TString>(lParam), api::SETTEXT);
 					return wideHandler(hWnd, Msg, wParam, reinterpret_cast<LPARAM>(c_str(processed)));
 				}
+				break;
 			}
 
 			return defaultHandler(hWnd, Msg, wParam, lParam);

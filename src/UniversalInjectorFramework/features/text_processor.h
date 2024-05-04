@@ -14,6 +14,8 @@ namespace uif::features
 
 		enum class api
 		{
+			IsDBCSLeadByte,
+			IsDBCSLeadByteEx,
 			MultiByteToWideChar,
 
 			GetGlyphOutlineA,

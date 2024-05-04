@@ -34,6 +34,24 @@ namespace uif::features
 			return string.has_value() ? string.value().c_str() : nullptr;
 		}
 
+#pragma region IsDBCSLeadByte
+
+		int __stdcall hook_IsDBCSLeadByte(BYTE TestChar)
+		{
+			return IsDBCSLeadByteEx(text_processor().conversion_codepage, TestChar);
+		}
+
+#pragma endregion
+
+#pragma region IsDBCSLeadByteEx
+
+		int __stdcall hook_IsDBCSLeadByteEx(UINT CodePage, BYTE TestChar)
+		{
+			return IsDBCSLeadByteEx(text_processor().conversion_codepage, TestChar);
+		}
+
+#pragma endregion
+
 #pragma region MultiByteToWideChar
 
 		int WINAPI hook_MultiByteToWideChar(UINT CodePage, DWORD dwFlags, LPCCH lpMultiByteStr, int cbMultiByte, LPWSTR lpWideCharStr, int cchWideChar)
@@ -627,6 +645,8 @@ namespace uif::features
 	}
 
 	const std::array<text_processor::api_descriptor, text_processor::api_count> text_processor::api_descriptors = { {
+		DEFINE_API_FUNC(IsDBCSLeadByte),
+		DEFINE_API_FUNC(IsDBCSLeadByteEx),
 		DEFINE_API_FUNC(MultiByteToWideChar),
 
 		// wingdi.h

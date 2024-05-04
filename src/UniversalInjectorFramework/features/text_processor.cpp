@@ -57,20 +57,24 @@ namespace uif::features
 
 		class replace_full_string_rule : public text_processor::processing_rule
 		{
-			std::wstring match_string;
-			std::wstring replacement;
+			std::vector<std::wstring> source;
+			std::vector<std::wstring> target;
+			size_t count;
 
 		public:
-			explicit replace_full_string_rule(std::wstring match_string, std::wstring replacement)
-				: match_string(std::move(match_string)), replacement(std::move(replacement))
+			explicit replace_full_string_rule(const std::vector<std::wstring>& source, const std::vector<std::wstring>& target)
+				: source(source), target(target), count(std::min(source.size(), target.size()))
 			{ }
 
 			bool process(std::wstring& value) override
 			{
-				if (value == match_string)
+				for (size_t i = 0; i < count; ++i)
 				{
-					value.assign(replacement);
-					return true;
+					if (value == source[i])
+					{
+						value.assign(target[i]);
+						return true;
+					}
 				}
 
 				return false;
@@ -226,6 +230,25 @@ namespace uif::features
 		set_enabled_apis(api_mask{});
 	}
 
+	std::vector<std::wstring> text_processor::parse_strings(const nlohmann::basic_json<>& value)
+	{
+		std::vector<std::wstring> result{};
+
+		if(value.is_string())
+		{
+			result.push_back(encoding::utf8_to_utf16(value.get<std::string>()));
+		}
+		else if(value.is_array())
+		{
+			for (const auto& string : value)
+			{
+				result.push_back(encoding::utf8_to_utf16(string.get<std::string>()));
+			}
+		}
+
+		return result;
+	}
+
 	text_processor::processing_rule* text_processor::parse_rule(const nlohmann::basic_json<>& rule) const
 	{
 		const auto& type = rule.value("type", "<null>");
@@ -243,21 +266,35 @@ namespace uif::features
 
 			return new replace_chars_rule(source_chars, target_chars);
 		}
-		else if (type == "replace_full_string")
-		{
-			const auto match_string = encoding::utf8_to_utf16(rule.value("match", ""));
-			const auto replacement = encoding::utf8_to_utf16(rule.value("replacement", ""));
 
-			return new replace_full_string_rule(match_string, replacement);
+		if (type == "replace_full_string")
+		{
+			const auto source = parse_strings(rule["match"]);
+			const auto target = parse_strings(rule["replacement"]);
+
+			if (source.empty() || target.empty())
+			{
+				std::cout << *this << dark_red(" Warning:") << " no substitutions defined for replace_full_string rule\n";
+				return nullptr;
+			}
+
+			if(source.size() != target.size())
+			{
+				std::cout << *this << dark_red(" Warning:") << " different number of match and replacement strings\n";
+			}
+
+			return new replace_full_string_rule(source, target);
 		}
-		else if (type == "replace_substring")
+
+		if (type == "replace_substring")
 		{
 			const auto match_string = encoding::utf8_to_utf16(rule.value("match", ""));
 			const auto replacement = encoding::utf8_to_utf16(rule.value("replacement", ""));
 
 			return new replace_substring_rule(match_string, replacement);
 		}
-		else if (type == "replace_regex")
+
+		if (type == "replace_regex")
 		{
 			const auto pattern = encoding::utf8_to_utf16(rule.value("pattern", ""));
 			const auto replacement = encoding::utf8_to_utf16(rule.value("replacement", ""));
@@ -265,17 +302,16 @@ namespace uif::features
 
 			return new replace_regex_rule(regex, replacement);
 		}
-		else if (type == "overwrite")
+
+		if (type == "overwrite")
 		{
 			const auto overwrite_value = encoding::utf8_to_utf16(rule.value("value", "<null>"));
 
 			return new overwrite_rule(overwrite_value);
 		}
-		else
-		{
-			std::cout << *this << dark_red(" Error:") << " unknown rule type: " << type << "\n";
-			return nullptr;
-		}
+
+		std::cout << *this << dark_red(" Error:") << " unknown rule type: " << type << "\n";
+		return nullptr;
 	}
 
 	text_processor::api_mask text_processor::parse_mask(const nlohmann::basic_json<>& value)

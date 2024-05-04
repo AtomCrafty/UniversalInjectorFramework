@@ -134,6 +134,7 @@ namespace uif::features
 		std::optional<std::wstring> process(const wchar_t* value, api api) const;
 
 	private:
+		static std::vector<std::wstring> parse_strings(const nlohmann::basic_json<>& value);
 		processing_rule* parse_rule(const nlohmann::basic_json<>& rule) const;
 		api_mask parse_mask(const nlohmann::basic_json<>& value);
 		void parse_mask(const nlohmann::basic_json<>& value, api_mask& mask);

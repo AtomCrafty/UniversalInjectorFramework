@@ -103,7 +103,7 @@ namespace uif::hooks
 
 	bool hook_import(const features::feature_base* feature, const char* importName, void* hookFunction)
 	{
-		hook_import_info info{ feature, importName, hookFunction, injector::instance().game_module, false, false };
+		hook_import_info info{ feature, importName, hookFunction, injector::instance().game_module, false, false, false };
 
 		DetourEnumerateImportsEx(injector::instance().game_module, &info, nullptr, hook_import_enum_proc);
 		for(const auto module : injector::instance().additional_modules)
@@ -128,7 +128,7 @@ namespace uif::hooks
 
 	bool unhook_import(const features::feature_base* feature, const char* importName, void* hookFunction)
 	{
-		hook_import_info info{ feature, importName, hookFunction, injector::instance().game_module, false, false };
+		hook_import_info info{ feature, importName, hookFunction, injector::instance().game_module, false, false, false };
 
 		DetourEnumerateImportsEx(injector::instance().game_module, &info, nullptr, unhook_import_enum_proc);
 		for(const auto module : injector::instance().additional_modules)
@@ -138,7 +138,10 @@ namespace uif::hooks
 		}
 
 		if(!info.found)
+		{
 			std::cout << *feature << black(" Unable to unhook import ") << black(importName) << black(" because it does not exist\n");
+		}
+
 		return info.success;
 	}
 

@@ -28,6 +28,8 @@ namespace uif::features
 			GetTextExtentPointW,
 			TextOutA,
 			TextOutW,
+			ExtTextOutA,
+			ExtTextOutW,
 
 			AppendMenuA,
 			AppendMenuW,

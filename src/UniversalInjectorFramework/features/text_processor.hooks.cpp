@@ -189,6 +189,22 @@ namespace uif::features
 
 #pragma endregion
 
+#pragma region ExtTextOut
+
+		BOOL WINAPI hook_ExtTextOutA(HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCSTR lpString, UINT c, const INT* lpDx)
+		{
+			const auto processed = text_processor().process(std::string(lpString, c), api::ExtTextOutA);
+			return ExtTextOutW(hdc, x, y, options, lprect, processed.c_str(), static_cast<int>(processed.length()), lpDx);
+		}
+
+		BOOL WINAPI hook_ExtTextOutW(HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx)
+		{
+			const auto processed = text_processor().process(std::wstring(lpString, c), api::ExtTextOutW);
+			return ExtTextOutW(hdc, x, y, options, lprect, processed.c_str(), static_cast<int>(processed.length()), lpDx);
+		}
+
+#pragma endregion
+
 #pragma region AppendMenu
 
 		BOOL WINAPI hook_AppendMenuA(HMENU hMenu, UINT uFlags, UINT_PTR uIDNewItem, LPCSTR lpNewItem)
@@ -660,6 +676,8 @@ namespace uif::features
 		DEFINE_API_FUNC(GetTextExtentPointW),
 		DEFINE_API_FUNC(TextOutA),
 		DEFINE_API_FUNC(TextOutW),
+		DEFINE_API_FUNC(ExtTextOutA),
+		DEFINE_API_FUNC(ExtTextOutW),
 
 		// winuser.h
 		DEFINE_API_FUNC(AppendMenuA),
@@ -708,6 +726,7 @@ namespace uif::features
 		DEFINE_API_SET("GetTextExtentPoint32", api::GetTextExtentPoint32A, api::GetTextExtentPoint32W),
 		DEFINE_API_SET("GetTextExtentPoint", api::GetTextExtentPointA, api::GetTextExtentPointW),
 		DEFINE_API_SET("TextOut", api::TextOutA, api::TextOutW),
+		DEFINE_API_SET("ExtTextOut", api::ExtTextOutA, api::ExtTextOutW),
 
 		DEFINE_API_SET("AppendMenu", api::AppendMenuA, api::AppendMenuW),
 		DEFINE_API_SET("InsertMenu", api::InsertMenuA, api::InsertMenuW),

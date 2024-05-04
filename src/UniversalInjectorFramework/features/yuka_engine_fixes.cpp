@@ -193,15 +193,37 @@ static int __cdecl HandleControlSequence_R2(yuka::Layer* messageLayer, const cha
 	return end - text + 1;
 }
 
+static int HandleControlSequence_N(yuka::Layer* layer, const char* text)
+{
+	const int lineHeight = GlobalFontTable[layer->fontId].charHeight;
+	layer->cursorX = layer->textArea.left;
+	layer->cursorY += lineHeight;
+
+	if (layer->textArea.bottom && layer->cursorY + lineHeight >= layer->textArea.bottom)
+	{
+		layer->cursorY = layer->textArea.top;
+		layer->waitForNextPage = true;
+	}
+
+	return 2;
+}
+
 static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::ScriptContext* ctx)
 {
 	//std::cout << "ProcessText: " << text << "\n";
+
+	static bool isFirstWordOfLine = true;
 
 	if (text == nullptr || *text == '\0')
 		return 0;
 
 	if (layer == nullptr)
 		return static_cast<int>(strlen(text));
+
+	if (layer->cursorX == layer->textArea.left && layer->cursorY == layer->textArea.top)
+	{
+		isFirstWordOfLine = true;
+	}
 
 	if (layer->waitForNextPage)
 	{
@@ -237,6 +259,9 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 		if (text[1] == 'm')
 			return HandleControlSequence_M(layer, text);
 
+		if (text[1] == 'n')
+			return HandleControlSequence_N(layer, text);
+
 		if (text[1] == 'l')
 			return HandleControlSequence_L(layer, text);
 
@@ -256,24 +281,23 @@ static int __cdecl ProcessTextHook(yuka::Layer* layer, const char* text, yuka::S
 
 		width += measure_first_char(&text[i], layer->fontId);
 		if (IsDBCSLeadByteEx(932, text[i])) i++;
+		if (isFirstWordOfLine) break;
 	}
 
 	// emit a line break if the word would overflow the line
-	if (layer->textArea.right && layer->cursorX + width >= layer->textArea.right)
+	if (layer->textArea.right && layer->cursorX + width >= layer->textArea.right || text[0] == '\n')
 	{
-		const int lineHeight = GlobalFontTable[layer->fontId].charHeight;
-		layer->cursorX = layer->textArea.left;
-		layer->cursorY += lineHeight;
+		HandleControlSequence_N(layer, text);
+		isFirstWordOfLine = true;
+	}
 
-		if (layer->textArea.bottom && layer->cursorY + lineHeight >= layer->textArea.bottom)
-		{
-			layer->cursorY = layer->textArea.top;
-			layer->waitForNextPage = true;
-		}
+	if (text[0] == ' ')
+	{
+		isFirstWordOfLine = false;
 	}
 
 	// skip whitespace at the start of a line
-	if (text[0] == ' ' && layer->cursorX == layer->textArea.left)
+	if ((text[0] == ' ' || text[0] == '\n') && layer->cursorX == layer->textArea.left)
 		return 1;
 
 	YLayer_AppendCharacterSprite(layer, text);

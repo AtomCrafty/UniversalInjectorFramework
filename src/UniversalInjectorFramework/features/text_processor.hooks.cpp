@@ -282,8 +282,7 @@ namespace uif::features
 
 			// ReSharper disable once CppTooWideScope CppJoinDeclarationAndAssignment
 			std::optional<std::wstring> processed;
-			if ((lpmii->fMask & MIIM_TYPE) == MIIM_TYPE &&
-				(lpmii->fMask & MIIM_STRING) == MIIM_STRING &&
+			if ((lpmii->fMask & (MIIM_TYPE | MIIM_STRING)) != 0 &&
 				(lpmii->fType & (MFT_BITMAP | MFT_OWNERDRAW | MFT_STRING | MFT_SEPARATOR)) == MFT_STRING)
 			{
 				processed = text_processor().process(lpmii->dwTypeData, api::InsertMenuItemA);
@@ -300,8 +299,7 @@ namespace uif::features
 
 			// ReSharper disable once CppTooWideScope CppJoinDeclarationAndAssignment
 			std::optional<std::wstring> processed;
-			if ((lpmii->fMask & MIIM_TYPE) == MIIM_TYPE &&
-				(lpmii->fMask & MIIM_STRING) == MIIM_STRING &&
+			if ((lpmii->fMask & (MIIM_TYPE | MIIM_STRING)) != 0 &&
 				(lpmii->fType & (MFT_BITMAP | MFT_OWNERDRAW | MFT_STRING | MFT_SEPARATOR)) == MFT_STRING)
 			{
 				processed = text_processor().process(lpmii->dwTypeData, api::InsertMenuItemW);

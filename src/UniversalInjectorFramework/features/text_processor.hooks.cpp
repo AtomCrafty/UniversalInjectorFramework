@@ -124,7 +124,43 @@ namespace uif::features
 				processed.resize(cchString);
 			}
 
-			return GetTextExtentExPointW(hdc, processed.c_str(), static_cast<int>(processed.length()), nMaxExtent, lpnFit, lpnDx, lpSize);
+			const int wideLength = static_cast<int>(processed.length());
+			const int ansiLength = cchString;
+
+			std::vector<int> wideDx(wideLength);
+			const auto ansiDx = lpnDx;
+
+			int wideFit = wideLength;
+
+			const auto result = GetTextExtentExPointW(hdc, processed.c_str(), wideLength, nMaxExtent,
+				lpnFit ? &wideFit : nullptr,
+				lpnDx ? wideDx.data() : nullptr,
+				lpSize);
+
+			int wideIndex = 0;
+			int ansiIndex = 0;
+
+			while (wideIndex < wideFit)
+			{
+				if(ansiIndex < ansiLength)
+				{
+					if (IsDBCSLeadByteEx(text_processor().conversion_codepage, lpszString[ansiIndex]))
+					{
+						ansiDx[ansiIndex++] = wideDx[wideIndex];
+						ansiDx[ansiIndex++] = wideDx[wideIndex];
+					}
+					else
+					{
+						ansiDx[ansiIndex++] = wideDx[wideIndex];
+					}
+				}
+
+				wideIndex++;
+			}
+
+			if (lpnFit) *lpnFit = ansiIndex;
+
+			return result;
 		}
 
 		BOOL WINAPI hook_GetTextExtentExPointW(HDC hdc, LPCWSTR lpszString, int cchString, int nMaxExtent, LPINT lpnFit, LPINT lpnDx, LPSIZE lpSize)

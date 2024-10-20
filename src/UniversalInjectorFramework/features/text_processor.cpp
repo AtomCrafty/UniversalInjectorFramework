@@ -212,9 +212,7 @@ namespace uif::features
 
 		if (rules.empty())
 		{
-			std::cout << *this << dark_red(" Error:") << " no rules specified. disabling text processor\n";
-			_enabled = false;
-			return;
+			std::cout << *this << dark_red(" Warning:") << " no rules specified\n";
 		}
 
 		set_enabled_apis(parse_mask(config()["enabled_apis"]));

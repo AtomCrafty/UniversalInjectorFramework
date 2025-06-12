@@ -688,7 +688,7 @@ public:
 					break;
 				}
 			}
-			break;
+			return TRUE;
 		}
 
 

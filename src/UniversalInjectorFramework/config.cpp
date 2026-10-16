@@ -15,7 +15,7 @@ namespace uif
 			if (!ifs.is_open())
 				return false;
 
-			ifs >> config;
+			config = nlohmann::json::parse(ifs, nullptr, true, true);
 			return true;
 		}
 		catch (nlohmann::json::parse_error& error)
